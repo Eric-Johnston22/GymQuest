@@ -1,3 +1,7 @@
+using GymQuest.Models;
+using GymQuest.DataAccess;
+using Microsoft.EntityFrameworkCore;
+
 namespace GymQuest
 {
     public class Program
@@ -8,6 +12,12 @@ namespace GymQuest
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            builder.Services.AddScoped<UserDAO>();
+
+            // Configure DbContext with connection string
+            builder.Services.AddDbContext<WorkoutDbContext>(options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             var app = builder.Build();
 
