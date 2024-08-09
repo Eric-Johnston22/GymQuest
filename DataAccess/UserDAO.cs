@@ -1,19 +1,20 @@
 ﻿using GymQuest.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace GymQuest.DataAccess
 {
     public class UserDAO
     {
-        private readonly WorkoutDbContext _context;
+        private readonly GymQuestDbContext _context;
 
-        public UserDAO(WorkoutDbContext context)
+        public UserDAO(GymQuestDbContext context)
         {
             _context = context;
         }
 
-        public User GetFirst()
+        public async Task<User> GetFirstAsync()
         {
-            return _context.Users.First();
+            return await _context.Users.FirstAsync();
         }
     }
 }

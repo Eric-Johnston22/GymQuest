@@ -16,10 +16,15 @@ namespace GymQuest.Controllers
             _userDAO = userDAO;
         }
 
+        //public async Task<IActionResult> Index()
+        //{
+        //    var user = await _userDAO.GetFirstAsync();
+        //    return View(user);
+        //}
+
         public IActionResult Index()
         {
-            var getFirstUser = _userDAO.GetFirst();
-            return View(getFirstUser);
+            return View();
         }
 
         public IActionResult Privacy()

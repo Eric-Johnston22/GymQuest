@@ -1,6 +1,7 @@
 using GymQuest.Models;
 using GymQuest.DataAccess;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace GymQuest
 {
@@ -13,11 +14,22 @@ namespace GymQuest
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
+            // Azure SQL Database connection string in user secrets. Will use for testing cloud DB later
+            if (builder.Environment.IsDevelopment())
+            {
+                builder.Configuration.AddUserSecrets<Program>();
+            }
+
             builder.Services.AddScoped<UserDAO>();
 
             // Configure DbContext with connection string
-            builder.Services.AddDbContext<WorkoutDbContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            builder.Services.AddDbContext<GymQuestDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("LocalDB"))); // Using Local SQL database for now
+
+            // Register Identity services
+            builder.Services.AddIdentity<User, IdentityRole>()
+                .AddEntityFrameworkStores<GymQuestDbContext>()
+                .AddDefaultTokenProviders();
 
             var app = builder.Build();
 
