@@ -1,5 +1,7 @@
 using GymQuest.DataAccess;
+using GymQuest.Services;
 using GymQuest.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
@@ -8,22 +10,23 @@ namespace GymQuest.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly UserDAO _userDAO;
+        private readonly UserManager<User> _userManager;
+        private readonly UserService _userService;
 
-        public HomeController(ILogger<HomeController> logger, UserDAO userDAO)
+        public HomeController(ILogger<HomeController> logger, UserManager<User> userManager, UserService userService)
         {
             _logger = logger;
-            _userDAO = userDAO;
+            _userManager = userManager;
+            _userService = userService;
         }
 
-        //public async Task<IActionResult> Index()
-        //{
-        //    var user = await _userDAO.GetFirstAsync();
-        //    return View(user);
-        //}
+        
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            string firstName = await _userService.GetFirstNameAsync(User);
+            ViewBag.FirstName = firstName;
+
             return View();
         }
 

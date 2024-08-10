@@ -1,4 +1,5 @@
 ﻿using GymQuest.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymQuest.DataAccess
@@ -6,15 +7,13 @@ namespace GymQuest.DataAccess
     public class UserDAO
     {
         private readonly GymQuestDbContext _context;
+        private readonly UserManager<User> _userManager;
 
-        public UserDAO(GymQuestDbContext context)
+        public UserDAO(GymQuestDbContext context, UserManager<User> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
-        public async Task<User> GetFirstAsync()
-        {
-            return await _context.Users.FirstAsync();
-        }
     }
 }

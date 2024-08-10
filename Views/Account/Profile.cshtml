@@ -1,0 +1,24 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<User> UserManager
+
+@{
+    ViewBag.Title = "Profile";
+}
+
+<div row>
+
+    <div class="col-md-12">
+        <ul class="flex-grow-1">
+            <li class="list-group-item">
+                First name: @ViewBag.FirstName
+            </li>
+            <li class="list-group-item">
+                Last name: @ViewBag.LastName
+            </li>
+            <li class="list-group-item">
+                Email: @ViewBag.Email
+            </li>
+        </ul>
+    </div>
+
+</div>

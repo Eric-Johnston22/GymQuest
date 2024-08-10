@@ -1,4 +1,5 @@
 ﻿using GymQuest.Models;
+using GymQuest.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -9,11 +10,13 @@ namespace GymQuest.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
+        private readonly UserService _userService;
 
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager)
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, UserService userService)
         {
             this._userManager = userManager;
             this._signInManager = signInManager;
+            this._userService = userService;
         }
 
         [HttpGet]
@@ -103,6 +106,16 @@ namespace GymQuest.Controllers
         {
             await _signInManager.SignOutAsync();
             return RedirectToAction("index", "home");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Profile()
+        {
+            var userData = await _userService.GetUserDataAsync(User);
+            ViewBag.FirstName = userData.FirstName;
+            ViewBag.LastName = userData.LastName;
+            ViewBag.Email = userData.Email;
+            return View();
         }
     }
 }
