@@ -46,14 +46,14 @@ namespace GymQuest.Controllers
                     CreatedAt = DateTime.Now
                 };
 
-                // Store user data in AspNewUsers database table
-                var result = await _userManager.CreateAsync(user, model.Password);
+                // Await result from User Service
+                var result = await _userService.CreateUserAsync(user, model.Password);
 
                 // If user is successfully created, sign-in the user using
                 // SignInManager and redirect to index action of HomeController
                 if (result.Succeeded)
                 {
-                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    await _userService.SignInUserAsync(user, isPersistant: false);
                     return RedirectToAction("index", "home");
                 }
 
@@ -74,7 +74,7 @@ namespace GymQuest.Controllers
         {
             if (ModelState.IsValid)
             {
-                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+                var result = await _userService.PasswordSignInUserAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
 
                 if (result.Succeeded)
                 {
