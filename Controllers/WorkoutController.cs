@@ -3,6 +3,9 @@ using GymQuest.Services;
 using GymQuest.Models.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using GymQuest.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace GymQuest.Controllers
 {
@@ -15,6 +18,34 @@ namespace GymQuest.Controllers
         {
             _userService = userService;
             _workoutService = workoutService;
+        }
+
+
+        [HttpGet]
+        public IActionResult CreateRoutine()
+        {
+            return View(new CreateRoutineViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateRoutine(CreateRoutineViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    await _workoutService.CreateRoutineAsync(model, User);
+                }
+                catch (Exception err)
+                {
+                    return View(err);
+                }
+                // Redirect to the next step, passing the WorkoutRoutineId
+                return RedirectToAction("AddWorkoutDays", new { id = workoutRoutine.WorkoutRoutineId });
+            }
+
+            return View(model);
         }
 
     }
