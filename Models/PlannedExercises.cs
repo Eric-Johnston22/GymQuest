@@ -17,7 +17,7 @@ namespace GymQuest.Models
         public string? Notes { get; set; }
 
         // Navigation properties
-        public WorkoutDays? WorkoutDays { get; set; }
-        public Exercises? Exercises { get; set; }
+        public virtual WorkoutDays? WorkoutDays { get; set; }
+        public virtual Exercises? Exercises { get; set; }
     }
 }

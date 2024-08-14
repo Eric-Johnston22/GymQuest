@@ -10,6 +10,7 @@
     @if (SignInManager.IsSignedIn(User))
     {
         <h1 class="display-4">Welcome, @ViewBag.FirstName</h1>
+        <h2><a asp-controller="Workout" asp-action="CreateRoutine">Create a routine!</a></h2>
     }
     else
     {

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GymQuest.Models
+namespace GymQuest.Models.ViewModels
 {
     public class RegisterViewModel
     {

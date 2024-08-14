@@ -3,6 +3,7 @@ using GymQuest.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using GymQuest.Services;
+using GymQuest.Data;
 
 namespace GymQuest
 {
@@ -21,8 +22,10 @@ namespace GymQuest
                 builder.Configuration.AddUserSecrets<Program>();
             }
 
-            builder.Services.AddScoped<UserDAO>();
+            builder.Services.AddScoped<UserRepository>();
             builder.Services.AddScoped<UserService>();
+            builder.Services.AddScoped<WorkoutService>();
+            builder.Services.AddScoped<WorkoutRepository>();
 
             // Configure DbContext with connection string
             builder.Services.AddDbContext<GymQuestDbContext>(options =>

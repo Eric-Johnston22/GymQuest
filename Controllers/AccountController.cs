@@ -1,4 +1,5 @@
 ﻿using GymQuest.Models;
+using GymQuest.Models.ViewModels;
 using GymQuest.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;

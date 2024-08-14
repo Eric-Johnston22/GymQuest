@@ -1,4 +1,4 @@
-namespace GymQuest.Models
+namespace GymQuest.Models.ViewModels
 {
     public class ErrorViewModel
     {

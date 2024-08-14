@@ -15,6 +15,7 @@ namespace GymQuest.Models
         public bool IsCycle { get; set; }
         public DateTime CreatedAt { get; set; }
 
-        public User? User { get; set; } // Navigation property
+        public virtual User? User { get; set; } // Navigation property
+        public virtual ICollection<WorkoutDays> WorkoutDays { get; set; } = new List<WorkoutDays>();
     }
 }

@@ -18,7 +18,7 @@ namespace GymQuest.Models
         public string? Notes { get; set; }
 
         // Navigation properties
-        public PlannedExercises? PlannedExercises { get; set; }
-        public User? User { get; set; }
+        public virtual PlannedExercises? PlannedExercises { get; set; }
+        public virtual User? User { get; set; }
     }
 }

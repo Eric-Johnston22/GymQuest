@@ -1,6 +1,7 @@
 using GymQuest.DataAccess;
 using GymQuest.Services;
 using GymQuest.Models;
+using GymQuest.Models.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;

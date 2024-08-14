@@ -31,7 +31,6 @@ namespace GymQuest.Services
         }
         
 
-
         public async Task<string> GetFirstNameAsync(ClaimsPrincipal user)
         {
             var currentUser = await _userManager.GetUserAsync(user);
@@ -44,6 +43,12 @@ namespace GymQuest.Services
             var currentUser = await _userManager.GetUserAsync(user);
 
             return currentUser!;
+        }
+
+        public string GetUserId(ClaimsPrincipal user)
+        {
+            string userId = _userManager.GetUserId(user);
+            return userId!;
         }
     }
 }
