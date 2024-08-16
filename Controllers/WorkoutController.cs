@@ -20,7 +20,7 @@ namespace GymQuest.Controllers
             _workoutService = workoutService;
         }
 
-
+        // routine creation
         [HttpGet]
         public IActionResult CreateRoutine()
         {
@@ -31,11 +31,13 @@ namespace GymQuest.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateRoutine(CreateRoutineViewModel model)
         {
+            int routineId;
             if (ModelState.IsValid)
             {
                 try
                 {
                     await _workoutService.CreateRoutineAsync(model, User);
+                    routineId = await _workoutService.GetRoutineIdAsync();
                 }
                 catch (Exception err)
                 {
