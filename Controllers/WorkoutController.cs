@@ -83,6 +83,9 @@ namespace GymQuest.Controllers
             {
                 return NotFound();
             }
+            
+            // Get a list of exercises
+            var exercises = await _workoutService.GetExercisesAsync();
 
             // Map WorkoutDays to WorkoutDayExercisesViewModel
             var model = new AssignExercisesViewModel
@@ -91,7 +94,7 @@ namespace GymQuest.Controllers
                 WorkoutDays = workoutRoutine.WorkoutDays.Select(day => new AssignExercisesViewModel.WorkoutDayExercisesViewModel
                 {
                     WorkoutDayId = day.WorkoutDayId,
-                    DayName = day.DaysOfWeek.DayName, // Assuming DaysOfWeek is a navigation property
+                    DayName = day.DaysOfWeek!.DayName!, // Assuming DaysOfWeek is a navigation property
                     PlannedExercises = day.PlannedExercises.Select(exercise => new AssignExercisesViewModel.WorkoutDayExercisesViewModel.PlannedExerciseViewModel
                     {
                         ExerciseId = exercise.ExerciseId,
@@ -103,7 +106,55 @@ namespace GymQuest.Controllers
                 }).ToList()
             };
 
+            ViewBag.Exercises = exercises;
+
             return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignExercises(AssignExercisesViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                await _workoutService.AssignExercisesAsync(model);
+                return RedirectToAction("ReviewRoutine", new { id = model.WorkoutRoutineId });
+            }
+
+            return View(model);
+        }
+
+        // Step 4: Review and confirm
+        [HttpGet]
+        public async Task<IActionResult> ReviewRoutine(int id)
+        {
+            var workoutRoutine = await _workoutService.GetWorkoutRoutineByIdAsync(id);
+            if (workoutRoutine == null || workoutRoutine.Status != "Draft")
+            {
+                return NotFound();
+            }
+
+            var model = new ReviewRoutineViewModel { WorkoutRoutine = workoutRoutine };
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ConfirmRoutine(int id)
+        {
+            await _workoutService.CompleteRoutineAsync(id);
+            return RedirectToAction("ViewRoutine", new { id = id });
+        }
+
+        // View Completed Routine
+        [HttpGet]
+        public async Task<IActionResult> ViewRoutine(int id)
+        {
+            var workoutRoutine = await _workoutService.GetWorkoutRoutineByIdAsync(id);
+            if (workoutRoutine == null || workoutRoutine.Status != "Completed")
+            {
+                return NotFound();
+            }
+            return View(workoutRoutine);
         }
     }
 }

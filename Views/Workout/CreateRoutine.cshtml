@@ -1,5 +1,29 @@
 ﻿@model GymQuest.Models.ViewModels.CreateRoutineViewModel
 
+@{
+    ViewData["Title"] = "Create Workout Routine";
+}
+
 <h2>Create a New Workout Routine</h2>
 
+<form asp-action="CreateRoutine" method="post">
+    <div class="form-group">
+        <label asp-for="RoutineName"></label>
+        <input asp-for="RoutineName" class="form-control" />
+        <span asp-validation-for="RoutineName" class="text-danger"></span>
+    </div>
 
+    <div class="form-group">
+        <label asp-for="CycleDays">Number of Cycle Days (optional)</label>
+        <input asp-for="CycleDays" class="form-control" />
+        <span asp-validation-for="CycleDays" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="IsCycle">Is this a cyclical routine?</label>
+        <input asp-for="IsCycle" type="checkbox" />
+        <span asp-validation-for="IsCycle" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Next</button>
+</form>

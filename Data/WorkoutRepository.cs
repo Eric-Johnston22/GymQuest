@@ -34,5 +34,10 @@ namespace GymQuest.Data
             _context.WorkoutRoutines.Update(routine);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<List<Exercises>> GetExercisesAsync()
+        {
+            return await _context.Exercises.ToListAsync();
+        }
     }
 }

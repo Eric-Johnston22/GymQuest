@@ -1,0 +1,37 @@
+﻿@model GymQuest.Models.ViewModels.ReviewRoutineViewModel
+
+@{
+    ViewData["Title"] = "Review Workout Routine";
+}
+
+<h2>Review Your Workout Routine</h2>
+
+<div>
+    <h3>Routine Name: @Model.WorkoutRoutine.RoutineName</h3>
+    <p><strong>Cycle Days:</strong> @Model.WorkoutRoutine.CycleDays</p>
+    <p><strong>Is Cyclical:</strong> @(Model.WorkoutRoutine.IsCycle ? "Yes" : "No")</p>
+
+    @foreach (var day in Model.WorkoutRoutine.WorkoutDays)
+    {
+        <h4>@day.DaysOfWeek.DayName</h4>
+
+        <ul>
+            @foreach (var exercise in day.PlannedExercises)
+            {
+                <li>
+                    @exercise.Exercises.Name - 
+                    @exercise.Sets sets of @exercise.Reps reps at @exercise.Weight lbs
+                    @if (!string.IsNullOrEmpty(exercise.Notes))
+                    {
+                        <br /><strong>Notes:</strong> @exercise.Notes
+                    }
+                </li>
+            }
+        </ul>
+    }
+</div>
+
+<form asp-action="ConfirmRoutine" method="post">
+    <input type="hidden" asp-for="WorkoutRoutine.WorkoutRoutineId" />
+    <button type="submit" class="btn btn-success">Confirm and Save Routine</button>
+</form>
