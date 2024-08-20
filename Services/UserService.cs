@@ -44,11 +44,5 @@ namespace GymQuest.Services
 
             return currentUser!;
         }
-
-        public string GetUserId(ClaimsPrincipal user)
-        {
-            string userId = _userManager.GetUserId(user);
-            return userId!;
-        }
     }
 }
