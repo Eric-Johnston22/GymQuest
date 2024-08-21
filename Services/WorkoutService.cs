@@ -32,6 +32,7 @@ namespace GymQuest.Services
                     CycleDays = model.CycleDays,
                     IsCycle = model.IsCycle,
                     UserId = userId,
+                    CreatedAt = DateTime.Now,
                     Status = "Draft" // Set as draft
                 };
 
@@ -87,6 +88,53 @@ namespace GymQuest.Services
                 await _workoutRepository.UpdateWorkoutRoutineAsync(workoutRoutine);
             }
         }
+
+        public async Task CreateExercise(Exercises exercise)
+        {
+            await _workoutRepository.CreateExercise(exercise);
+        }
+
+        public async Task<(bool Success, string ExerciseName, string ErrorMessage)> AddExerciseToDayAsync(
+    AssignExercisesViewModel.WorkoutDayExercisesViewModel.PlannedExerciseViewModel model, int workoutDayId)
+        {
+            try
+            {
+                // Business logic: validate inputs, check if the workout day exists, etc.
+                var workoutDay = await _workoutRepository.GetWorkoutDayByIdAsync(workoutDayId);
+                if (workoutDay == null)
+                {
+                    return (false, null, "Workout day not found.");
+                }
+
+                var exercise = await _workoutRepository.GetExerciseByIdAsync(model.ExerciseId);
+                if (exercise == null)
+                {
+                    return (false, null, "Exercise not found.");
+                }
+
+                var plannedExercise = new PlannedExercises
+                {
+                    WorkoutDayId = workoutDayId,
+                    ExerciseId = model.ExerciseId,
+                    Sets = model.Sets,
+                    Reps = model.Reps,
+                    Weight = model.Weight,
+                    Notes = model.Notes
+                };
+
+                // Delegate the actual database save operation to the data layer
+                await _workoutRepository.AddPlannedExerciseAsync(plannedExercise);
+
+                return (true, exercise.Name, null);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                Console.WriteLine("Error in AddExerciseToDayAsync: " + ex.Message);
+                return (false, null, "An error occurred while adding the exercise.");
+            }
+        }
+
 
         public async Task<WorkoutRoutines?> GetWorkoutRoutineByIdAsync(int id)
         {

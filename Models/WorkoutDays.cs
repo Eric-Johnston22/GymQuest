@@ -15,6 +15,7 @@ namespace GymQuest.Models
         public string? WorkoutType { get; set; }
 
         public virtual DaysOfWeek? DaysOfWeek { get; set; } // Navigation property
+        public virtual WorkoutRoutines? WorkoutRoutine { get; set; }
 
         // Navigation property to represent the collection of exercises planned for this day
         public virtual ICollection<PlannedExercises> PlannedExercises { get; set; } = new List<PlannedExercises>();

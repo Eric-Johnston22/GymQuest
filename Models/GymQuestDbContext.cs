@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace GymQuest.Models
 {
@@ -22,11 +23,26 @@ namespace GymQuest.Models
 
             builder.Entity<PlannedExercises>()
                 .Property(e => e.Weight)
-                .HasPrecision(18, 2);
+            .HasPrecision(18, 2);
+
+            builder.Entity<PlannedExercises>()
+                .HasOne(pe => pe.WorkoutDays)
+                .WithMany(wd => wd.PlannedExercises)
+                .HasForeignKey(pe => pe.WorkoutDayId);
+
+            builder.Entity<PlannedExercises>()
+                .HasOne(pe => pe.Exercises)
+                .WithMany()
+                .HasForeignKey(pe => pe.ExerciseId);
 
             builder.Entity<ExerciseLogs>()
                 .Property(e => e.Weight)
                 .HasPrecision(18, 2);
+
+            builder.Entity<WorkoutDays>()
+                .HasOne(wd => wd.DaysOfWeek)
+                .WithMany()
+                .HasForeignKey(wd => wd.DayId);
         }
     }
 }

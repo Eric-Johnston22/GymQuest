@@ -9,28 +9,62 @@
 <form asp-action="AddWorkoutDays" method="post">
     <input type="hidden" asp-for="WorkoutRoutineId" />
 
-    @for (int i = 0; i < Model.WorkoutDays.Count; i++)
-    {
-        <div class="form-group">
-            <label asp-for="WorkoutDays[i].DayId">Select Day:</label>
-            <select asp-for="WorkoutDays[i].DayId" class="form-control">
-                <option value="1">Monday</option>
-                <option value="2">Tuesday</option>
-                <option value="3">Wednesday</option>
-                <option value="4">Thursday</option>
-                <option value="5">Friday</option>
-                <option value="6">Saturday</option>
-                <option value="7">Sunday</option>
-            </select>
-            <span asp-validation-for="WorkoutDays[i].DayId" class="text-danger"></span>
-        </div>
+    <div id="workoutDaysContainer">
+        <div class="workout-day">
+            <div class="form-group">
+                <label>Select Day:</label>
+                <select name="WorkoutDays[0].DayId" class="form-control">
+                    <option value="1">Monday</option>
+                    <option value="2">Tuesday</option>
+                    <option value="3">Wednesday</option>
+                    <option value="4">Thursday</option>
+                    <option value="5">Friday</option>
+                    <option value="6">Saturday</option>
+                    <option value="7">Sunday</option>
+                </select>
+            </div>
 
-        <div class="form-group">
-            <label asp-for="WorkoutDays[i].WorkoutType">Workout Type:</label>
-            <input asp-for="WorkoutDays[i].WorkoutType" class="form-control" />
-            <span asp-validation-for="WorkoutDays[i].WorkoutType" class="text-danger"></span>
+            <div class="form-group">
+                <label>Workout Type:</label>
+                <input name="WorkoutDays[0].WorkoutType" class="form-control" />
+            </div>
         </div>
-    }
+    </div>
 
+    <button type="button" id="addWorkoutDayButton" class="btn btn-secondary">Add Another Day</button>
     <button type="submit" class="btn btn-primary">Next</button>
 </form>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var workoutDayIndex = 1; // Start indexing at 1 since the first day is already present
+
+            $('#addWorkoutDayButton').click(function () {
+                var workoutDayHtml = `
+                            <div class="workout-day">
+                                <div class="form-group">
+                                    <label>Select Day:</label>
+                                    <select name="WorkoutDays[${workoutDayIndex}].DayId" class="form-control">
+                                        <option value="1">Monday</option>
+                                        <option value="2">Tuesday</option>
+                                        <option value="3">Wednesday</option>
+                                        <option value="4">Thursday</option>
+                                        <option value="5">Friday</option>
+                                        <option value="6">Saturday</option>
+                                        <option value="7">Sunday</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Workout Type:</label>
+                                    <input name="WorkoutDays[${workoutDayIndex}].WorkoutType" class="form-control" />
+                                </div>
+                            </div>`;
+
+                $('#workoutDaysContainer').append(workoutDayHtml);
+                workoutDayIndex++;
+            });
+        });
+    </script>
+}

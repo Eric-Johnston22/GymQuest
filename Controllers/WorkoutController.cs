@@ -37,13 +37,13 @@ namespace GymQuest.Controllers
                 try
                 {
                     workoutRoutineId = await _workoutService.CreateRoutineAsync(model, User);
+                    // Redirect to the next step, passing the WorkoutRoutineId
+                    return RedirectToAction("AddWorkoutDays", new { id = workoutRoutineId });
                 }
                 catch (Exception err)
                 {
-                    return View(err);
+                    ModelState.AddModelError(string.Empty, "An error occurred while saving the routine. Please try again.");
                 }
-                // Redirect to the next step, passing the WorkoutRoutineId
-                return RedirectToAction("AddWorkoutDays", new { id = workoutRoutineId });
             }
 
             return View(model);
@@ -58,7 +58,15 @@ namespace GymQuest.Controllers
             {
                 return NotFound();
             }
-            var model = new AddWorkoutDaysViewModel { WorkoutRoutineId = id };
+            var model = new AddWorkoutDaysViewModel 
+            { 
+                WorkoutRoutineId = id,
+                WorkoutDays = new List<AddWorkoutDaysViewModel.WorkoutDayViewModel>
+                {
+                    new AddWorkoutDaysViewModel.WorkoutDayViewModel()
+                }
+            
+            };
             return View(model);
         }
 
@@ -84,8 +92,9 @@ namespace GymQuest.Controllers
                 return NotFound();
             }
             
-            // Get a list of exercises
+            // Get a list of exercises to be used in the dropdown list
             var exercises = await _workoutService.GetExercisesAsync();
+            ViewBag.Exercises = exercises;
 
             // Map WorkoutDays to WorkoutDayExercisesViewModel
             var model = new AssignExercisesViewModel
@@ -94,7 +103,7 @@ namespace GymQuest.Controllers
                 WorkoutDays = workoutRoutine.WorkoutDays.Select(day => new AssignExercisesViewModel.WorkoutDayExercisesViewModel
                 {
                     WorkoutDayId = day.WorkoutDayId,
-                    DayName = day.DaysOfWeek!.DayName!, // Assuming DaysOfWeek is a navigation property
+                    DayName = day.DaysOfWeek?.DayName ?? "Unknown Day",
                     PlannedExercises = day.PlannedExercises.Select(exercise => new AssignExercisesViewModel.WorkoutDayExercisesViewModel.PlannedExerciseViewModel
                     {
                         ExerciseId = exercise.ExerciseId,
@@ -106,7 +115,6 @@ namespace GymQuest.Controllers
                 }).ToList()
             };
 
-            ViewBag.Exercises = exercises;
 
             return View(model);
         }
@@ -123,6 +131,55 @@ namespace GymQuest.Controllers
 
             return View(model);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateExercise(string name, string description)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                return BadRequest("Exercise name is required.");
+            }
+
+            var newExercise = new Exercises
+            {
+                Name = name,
+                Description = description
+            };
+
+            await _workoutService.CreateExercise(newExercise);
+
+            return Json(new { exerciseId = newExercise.ExerciseId, name = newExercise.Name });
+        }
+
+        public async Task<IActionResult> AddExerciseToDay(AssignExercisesViewModel.WorkoutDayExercisesViewModel.PlannedExerciseViewModel model, int workoutDayId)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var result = await _workoutService.AddExerciseToDayAsync(model, workoutDayId);
+
+                    if (result.Success)
+                    {
+                        Console.WriteLine("Add exercise to day success!");
+                        return Json(new { exerciseName = result.ExerciseName });
+                    }
+                    else
+                    {
+                        return StatusCode(500, result.ErrorMessage);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log the exception
+                    Console.WriteLine("Error in AddExerciseToDay POST method: " + ex.Message);
+                    return StatusCode(500, "Internal server error");
+                }
+            }
+
+            return BadRequest("Invalid data provided.");
+        }
+
 
         // Step 4: Review and confirm
         [HttpGet]

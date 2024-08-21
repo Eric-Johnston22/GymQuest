@@ -7,5 +7,8 @@ namespace GymQuest.Models
         [Key]
         public int DayId { get; set; }
         public string? DayName { get; set; }
+
+        // Navigation property
+        public ICollection<WorkoutDays> WorkoutDays { get; set; }
     }
 }
