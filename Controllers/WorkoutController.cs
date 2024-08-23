@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using GymQuest.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Diagnostics;
 
 namespace GymQuest.Controllers
 {
@@ -198,6 +199,10 @@ namespace GymQuest.Controllers
         [HttpPost]
         public async Task<IActionResult> ConfirmRoutine(int id)
         {
+            if (id == 0)
+            {
+                Debug.WriteLine("WorkoutRoutineId is Zero in ConfirmRoutine()");
+            }
             await _workoutService.CompleteRoutineAsync(id);
             return RedirectToAction("ViewRoutine", new { id = id });
         }
@@ -211,7 +216,29 @@ namespace GymQuest.Controllers
             {
                 return NotFound();
             }
-            return View(workoutRoutine);
+
+            var model = new ViewRoutineViewModel
+            {
+                WorkoutRoutineId = workoutRoutine.WorkoutRoutineId,
+                RoutineName = workoutRoutine.RoutineName,
+                CycleDays = workoutRoutine.CycleDays,
+                IsCycle = workoutRoutine.IsCycle,
+                WorkoutDays = workoutRoutine.WorkoutDays.Select(day => new ViewRoutineDayViewModel
+                {
+                    DayName = day.DaysOfWeek?.DayName,
+                    Exercises = day.PlannedExercises.Select(ex => new ViewRoutineExerciseViewModel
+                    {
+                        ExerciseName = ex.Exercises?.Name,
+                        Sets = ex.Sets,
+                        Reps = ex.Reps,
+                        Weight = ex.Weight,
+                        Notes = ex.Notes
+                    }).ToList()
+                }).ToList()
+            };
+
+            return View(model);
         }
+
     }
 }

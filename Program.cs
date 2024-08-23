@@ -26,6 +26,8 @@ namespace GymQuest
             builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<WorkoutService>();
             builder.Services.AddScoped<WorkoutRepository>();
+            builder.Services.AddScoped<ExerciseTrackingService>();
+            builder.Services.AddScoped<ExerciseTrackingRepository>();
 
             // Configure DbContext with connection string
             builder.Services.AddDbContext<GymQuestDbContext>(options =>

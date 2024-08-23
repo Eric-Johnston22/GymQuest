@@ -4,6 +4,7 @@ using GymQuest.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GymQuest.Migrations
 {
     [DbContext(typeof(GymQuestDbContext))]
-    partial class GymQuestDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240822200414_UpdateRelationships2")]
+    partial class UpdateRelationships2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -49,9 +52,6 @@ namespace GymQuest.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsSuccessful")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
 
@@ -61,10 +61,10 @@ namespace GymQuest.Migrations
                     b.Property<int?>("PlannedExercisesId")
                         .HasColumnType("int");
 
-                    b.Property<int>("RepsCompleted")
+                    b.Property<int>("Reps")
                         .HasColumnType("int");
 
-                    b.Property<int>("SetNumber")
+                    b.Property<int>("Sets")
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
@@ -228,9 +228,6 @@ namespace GymQuest.Migrations
                     b.Property<int>("DayInCycle")
                         .HasColumnType("int");
 
-                    b.Property<int?>("DaysOfWeekDayId")
-                        .HasColumnType("int");
-
                     b.Property<int>("WorkoutRoutineId")
                         .HasColumnType("int");
 
@@ -240,8 +237,6 @@ namespace GymQuest.Migrations
                     b.HasKey("WorkoutDayId");
 
                     b.HasIndex("DayId");
-
-                    b.HasIndex("DaysOfWeekDayId");
 
                     b.HasIndex("WorkoutRoutineId");
 
@@ -451,14 +446,10 @@ namespace GymQuest.Migrations
             modelBuilder.Entity("GymQuest.Models.WorkoutDays", b =>
                 {
                     b.HasOne("GymQuest.Models.DaysOfWeek", "DaysOfWeek")
-                        .WithMany()
+                        .WithMany("WorkoutDays")
                         .HasForeignKey("DayId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("GymQuest.Models.DaysOfWeek", null)
-                        .WithMany("WorkoutDays")
-                        .HasForeignKey("DaysOfWeekDayId");
 
                     b.HasOne("GymQuest.Models.WorkoutRoutines", "WorkoutRoutine")
                         .WithMany("WorkoutDays")

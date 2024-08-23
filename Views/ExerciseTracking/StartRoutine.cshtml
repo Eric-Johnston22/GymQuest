@@ -1,44 +1,56 @@
-﻿@model GymQuest.Models.ViewModels.AssignExercisesViewModel
+﻿@model GymQuest.Models.ViewModels.StartRoutineViewModel
 
 @{
-    ViewData["Title"] = "Assign Exercises";
+    ViewData["Title"] = "Start Routine";
     var exercises = ViewBag.Exercises as List<GymQuest.Models.Exercises>; // Ensure correct type
 }
 
-<h2>Assign Exercises to Each Workout Day</h2>
+<h2>@Model.RoutineName - @Model.DayName</h2>
 
-<form asp-action="AssignExercises" method="post">
-    <input type="hidden" asp-for="WorkoutRoutineId" />
+@if (!Model.PlannedExercises.Any())
+{
+    <p>No exercises are planned for today.</p>
+    <button type="button" class="btn btn-secondary" onclick="openAddExerciseModal('@Model.DayName')">Add Exercise</button>
+}
 
-    @foreach (var day in Model.WorkoutDays)
-    {
-        <div>
-            <h3>@day.DayName</h3>
-
-            <div id="exerciseList-@day.WorkoutDayId">
-                @if (day.PlannedExercises != null && day.PlannedExercises.Any())
+@foreach (var exercise in Model.PlannedExercises)
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Exercise</th>
+                <th>Set</th>
+                <th>Reps</th>
+                <th>Weight (lbs)</th>
+                <th>Completed</th>
+                <th>Failed Rep</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var e in Model.PlannedExercises)
+            {
+                for (int set = 1; set <= exercise.Sets; set++)
                 {
-                    <ul>
-                        @foreach (var exercise in day.PlannedExercises)
+                    <tr>
+                        @if (set == 1)
                         {
-                            var exerciseName = exercises?.FirstOrDefault(e => e.ExerciseId == exercise.ExerciseId)?.Name ?? "Unknown Exercise";
-                            <li>@exerciseName - @exercise.Sets sets of @exercise.Reps reps at @exercise.Weight lbs</li>
+                            <td rowspan="@exercise.Sets">@exercise.ExerciseName</td>
                         }
-                    </ul>
+                        <td>@set</td>
+                        <td>@exercise.Reps</td>
+                        <td>@exercise.Weight</td>
+                        <td>
+                            <input type="checkbox" asp-for="@exercise.IsSuccessful" name="isSuccessful[@exercise.PlannedExerciseId][@set]" />
+                        </td>
+                        <td>
+                            <input type="number" asp-for="@exercise.FailedRep" name="failedRep[@exercise.PlannedExerciseId][@set]" min="0" max="@exercise.Reps" class="form-control" />
+                        </td>
+                    </tr>
                 }
-                else
-                {
-                    <p>No exercises assigned yet.</p>
-                }
-            </div>
-
-            <!-- Button to open the modal to add a new exercise -->
-            <button type="button" class="btn btn-secondary" onclick="openAddExerciseModal(@day.WorkoutDayId)">Add Exercise</button>
-        </div>
-    }
-
-    <button type="submit" class="btn btn-primary">Review Routine</button>
-</form>
+            }
+        </tbody>
+    </table>
+}
 
 <!-- Modal for adding a new exercise -->
 <div class="modal fade" id="addExerciseModal" tabindex="-1" role="dialog" aria-labelledby="addExerciseModalLabel" aria-hidden="true">
@@ -50,7 +62,8 @@
             </div>
             <div class="modal-body">
                 <form id="addExerciseForm">
-                    <input type="hidden" id="workoutDayId" name="workoutDayId" />
+                    <input type="hidden" id="workoutDayName" name="dayName" value="@Model.DayName" />
+                    <input type="hidden" id="workoutRoutineId" name="workoutRoutineId" value="@Model.WorkoutRoutineId" />
 
                     <div class="form-group">
                         <label for="exerciseId">Exercise:</label>
@@ -120,8 +133,9 @@
 
 @section Scripts {
     <script type="text/javascript">
-        function openAddExerciseModal(workoutDayId) {
-            $('#workoutDayId').val(workoutDayId);
+        function openAddExerciseModal(dayName) {
+            console.log(dayName);
+            $('#workoutDayName').val(dayName);
             $('#addExerciseModal').modal('show');
         }
 
@@ -130,7 +144,8 @@
         }
 
         function saveExercise() {
-            var workoutDayId = $('#workoutDayId').val();
+            var workoutRoutineId = $('#workoutRoutineId').val();
+            var dayName = $('#workoutDayName').val();
             var exerciseId = $('#exerciseId').val();
             var sets = $('#sets').val();
             var reps = $('#reps').val();
@@ -138,10 +153,11 @@
             var notes = $('#notes').val();
 
             $.ajax({
-                url: '@Url.Action("AddExerciseToDay", "Workout")',
+                url: '@Url.Action("AddExerciseToDay", "ExerciseTracking")',
                 type: 'POST',
                 data: {
-                    workoutDayId: workoutDayId,
+                    workoutRoutineId: workoutRoutineId,
+                    dayName: dayName,
                     exerciseId: exerciseId,
                     sets: sets,
                     reps: reps,
@@ -150,7 +166,7 @@
                 },
                 success: function (response) {
                     // Append the new exercise to the correct day in the view
-                    $('#exerciseList-' + workoutDayId).append('<li>' + response.exerciseName + ' - ' + sets + ' sets of ' + reps + ' reps at ' + weight + ' lbs</li>');
+                    $('#exerciseList-' + dayName).append('<li>' + response.exerciseName + ' - ' + sets + ' sets of ' + reps + ' reps at ' + weight + ' lbs</li>');
                     $('#addExerciseModal').modal('hide');
                 },
                 error: function (xhr, status, error) {
@@ -167,7 +183,7 @@
             var exerciseDescription = $('#exerciseDescription').val();
 
             $.ajax({
-                url: '@Url.Action("CreateExercise", "Workout")',
+                url: '@Url.Action("CreateExercise", "ExerciseTracking")',
                 type: 'POST',
                 data: {
                     name: exerciseName,
@@ -187,4 +203,3 @@
         }
     </script>
 }
-

@@ -1,1 +1,29 @@
-﻿
+﻿@model GymQuest.Models.ViewModels.ViewRoutineViewModel
+
+<h2>@Model.RoutineName</h2>
+<p><strong>Cycle Days:</strong> @Model.CycleDays</p>
+<p><strong>Is Cyclical:</strong> @(Model.IsCycle ? "Yes" : "No")</p>
+
+@foreach (var day in Model.WorkoutDays)
+{
+    <h3>@day.DayName</h3>
+    <ul>
+        @foreach (var exercise in day.Exercises)
+        {
+            <li>
+                @exercise.ExerciseName - @exercise.Sets sets of @exercise.Reps reps at @exercise.Weight lbs
+                @if (!string.IsNullOrEmpty(exercise.Notes))
+                {
+                    <br />
+
+                    <strong>Notes:</strong> @exercise.Notes
+                }
+            </li>
+        }
+    </ul>
+}
+
+<a asp-action="EditRoutine" asp-route-id="@Model.WorkoutRoutineId" class="btn btn-primary">Edit Routine</a>
+<button type="button" class="btn btn-primary" onclick="location.href='@Url.Action("StartRoutine", "ExerciseTracking", new { routineId = Model.WorkoutRoutineId })'">
+    Start Routine
+</button>

@@ -8,8 +8,13 @@
 
 <div>
     <h3>Routine Name: @Model.WorkoutRoutine.RoutineName</h3>
-    <p><strong>Cycle Days:</strong> @Model.WorkoutRoutine.CycleDays</p>
-    <p><strong>Is Cyclical:</strong> @(Model.WorkoutRoutine.IsCycle ? "Yes" : "No")</p>
+    @if (Model.WorkoutRoutine.IsCycle || Model.WorkoutRoutine.CycleDays > 0)
+    {
+        <p><strong>Cycle Days:</strong> @Model.WorkoutRoutine.CycleDays</p>
+        <p><strong>Is Cyclical:</strong> @(Model.WorkoutRoutine.IsCycle ? "Yes" : "No")</p>
+    }
+
+    
 
     @foreach (var day in Model.WorkoutRoutine.WorkoutDays)
     {
@@ -31,7 +36,8 @@
     }
 </div>
 
+
 <form asp-action="ConfirmRoutine" method="post">
-    <input type="hidden" asp-for="WorkoutRoutine.WorkoutRoutineId" />
+    <input type="hidden" name="id" asp-for="@Model.WorkoutRoutine.WorkoutRoutineId" />
     <button type="submit" class="btn btn-success">Confirm and Save Routine</button>
 </form>
