@@ -1,8 +1,10 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @inject UserManager<User> UserManager
+@model List<WorkoutRoutines>
 
 @{
     ViewBag.Title = "Profile";
+    var firstName = Model.FirstOrDefault().User.FirstName;
 }
 
 <div row>
@@ -10,10 +12,17 @@
     <div class="col-md-12">
         <ul class="flex-grow-1">
             <li class="list-group-item">
-                First name: @ViewBag.FirstName
+                @if (firstName == "dylan" || firstName == "Dylan")
+                {
+                    <p>Well well well. If it isn't Dylan Sedmak.</p>
+                }
+                else
+                {
+                    <p>First name: @firstName</p>
+                }
             </li>
             <li class="list-group-item">
-                Last name: @ViewBag.LastName
+                <p>Last name: @ViewBag.LastName</p>
             </li>
             <li class="list-group-item">
                 Email: @ViewBag.Email
@@ -21,5 +30,18 @@
         </ul>
     </div>
 
+
+</div>
+
+<div row>
+
+    <div class="col-md-12">
+        @foreach(var routine in Model)
+        {
+            <ul>
+                <a asp-controller="Workout" asp-route-id="@routine.WorkoutRoutineId" asp-action="ViewRoutine">@routine.RoutineName</a>
+            </ul>
+        }
+    </div>
 
 </div>

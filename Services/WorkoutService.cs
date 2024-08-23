@@ -141,6 +141,11 @@ namespace GymQuest.Services
             return await _workoutRepository.GetWorkoutRoutineByIdAsync(id);
         }
 
+        public async Task<List<WorkoutRoutines>> GetWorkoutRoutinesByUserAsync(string id)
+        {
+            return await _workoutRepository.GetWorkoutRoutinesByUserAsync(id);
+        }
+
         public async Task CompleteRoutineAsync(int id)
         {
             var workoutRoutine = await _workoutRepository.GetWorkoutRoutineByIdAsync(id);

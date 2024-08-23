@@ -12,12 +12,14 @@ namespace GymQuest.Controllers
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly UserService _userService;
+        private readonly WorkoutService _workoutService;
 
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, UserService userService)
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, UserService userService, WorkoutService workoutService)
         {
-            this._userManager = userManager;
-            this._signInManager = signInManager;
-            this._userService = userService;
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _userService = userService;
+            _workoutService = workoutService;
         }
 
         [HttpGet]
@@ -110,13 +112,15 @@ namespace GymQuest.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Profile()
+        public async Task<IActionResult> Profile(int id)
         {
             var userData = await _userService.GetUserDataAsync(User);
+            var exercises = await _workoutService.GetWorkoutRoutinesByUserAsync(userData.Id);
             ViewBag.FirstName = userData.FirstName;
             ViewBag.LastName = userData.LastName;
             ViewBag.Email = userData.Email;
-            return View();
+            ViewBag.Exercises = exercises;
+            return View(exercises);
         }
     }
 }

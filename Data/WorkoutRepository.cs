@@ -68,6 +68,14 @@ namespace GymQuest.Data
             return await _context.Exercises.FirstOrDefaultAsync(e => e.ExerciseId == exerciseId);
         }
 
+        public async Task<List<WorkoutRoutines>> GetWorkoutRoutinesByUserAsync(string id)
+        {
+            return await _context.WorkoutRoutines
+                                 .Include(wr => wr.WorkoutDays)
+                                 .Where(wr => wr.UserId == id)
+                                 .ToListAsync();
+        }
+
         public async Task AddPlannedExerciseAsync(PlannedExercises plannedExercise)
         {
             await _context.PlannedExercises.AddAsync(plannedExercise);
