@@ -2,7 +2,7 @@
 {
     public class ExerciseLogViewModel
     {
-        public int PlannedExerciseId { get; set; }
+        public int PlannedExercisesId { get; set; }
         public string ExerciseName { get; set; }
         public int SetNumber { get; set; }
         public int Sets { get; set; }

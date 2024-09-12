@@ -8,10 +8,10 @@ namespace GymQuest.Models
         [Key]
         public int LogId { get; set; }
 
-        [ForeignKey("Id")]
+        [ForeignKey("User")]
         public string? UserId { get; set; }
-        [ForeignKey("PlannedExerciseId")]
-        public int PlannedExerciseId { get; set; }
+        [ForeignKey("PlannedExercises")]
+        public int PlannedExercisesId { get; set; }
 
         public DateTime Date { get; set; }
         public int SetNumber { get; set; } // The specific set number being logged

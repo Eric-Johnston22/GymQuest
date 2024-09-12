@@ -24,6 +24,7 @@
 }
 
 <a asp-action="EditRoutine" asp-route-id="@Model.WorkoutRoutineId" class="btn btn-primary">Edit Routine</a>
-<button type="button" class="btn btn-primary" onclick="location.href='@Url.Action("StartRoutine", "ExerciseTracking", new { routineId = Model.WorkoutRoutineId })'">
-    Start Routine
-</button>
+<a asp-action="StartRoutine" method="post">
+    <input type="hidden" name="routineId" value="@Model.WorkoutRoutineId" />
+    <button type="submit" class="btn btn-primary">Start Routine</button>
+</a>

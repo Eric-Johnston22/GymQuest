@@ -43,6 +43,12 @@ namespace GymQuest.Models
                 .HasOne(wd => wd.DaysOfWeek)
                 .WithMany()
                 .HasForeignKey(wd => wd.DayId);
+
+            // Configuring the one-to-one relationship between User and WorkoutRoutines
+            builder.Entity<User>()
+                .HasOne(u => u.CurrentWorkoutRoutine)
+                .WithOne(wr => wr.User)
+                .HasForeignKey<User>(u => u.CurrentWorkoutRoutineId); // Explicitly specify the foreign key property
         }
     }
 }

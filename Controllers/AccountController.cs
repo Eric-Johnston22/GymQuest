@@ -115,12 +115,13 @@ namespace GymQuest.Controllers
         public async Task<IActionResult> Profile(int id)
         {
             var userData = await _userService.GetUserDataAsync(User);
-            var exercises = await _workoutService.GetWorkoutRoutinesByUserAsync(userData.Id);
+            var workoutRoutines = await _workoutService.GetWorkoutRoutinesByUserAsync(userData.Id);
+
             ViewBag.FirstName = userData.FirstName;
             ViewBag.LastName = userData.LastName;
             ViewBag.Email = userData.Email;
-            ViewBag.Exercises = exercises;
-            return View(exercises);
+            ViewBag.Exercises = workoutRoutines;
+            return View(workoutRoutines);
         }
     }
 }

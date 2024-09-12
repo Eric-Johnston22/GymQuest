@@ -40,10 +40,10 @@
                         <td>@exercise.Reps</td>
                         <td>@exercise.Weight</td>
                         <td>
-                            <input type="checkbox" asp-for="@exercise.IsSuccessful" name="isSuccessful[@exercise.PlannedExerciseId][@set]" />
+                            <input type="checkbox" asp-for="@exercise.IsSuccessful" name="isSuccessful[@exercise.PlannedExercisesId][@set]" />
                         </td>
                         <td>
-                            <input type="number" asp-for="@exercise.FailedRep" name="failedRep[@exercise.PlannedExerciseId][@set]" min="0" max="@exercise.Reps" class="form-control" />
+                            <input type="number" asp-for="@exercise.FailedRep" name="failedRep[@exercise.PlannedExercisesId][@set]" min="0" max="@exercise.Reps" class="form-control" />
                         </td>
                     </tr>
                 }

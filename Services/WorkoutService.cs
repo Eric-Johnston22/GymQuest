@@ -95,7 +95,7 @@ namespace GymQuest.Services
         }
 
         public async Task<(bool Success, string ExerciseName, string ErrorMessage)> AddExerciseToDayAsync(
-    AssignExercisesViewModel.WorkoutDayExercisesViewModel.PlannedExerciseViewModel model, int workoutDayId)
+            AssignExercisesViewModel.WorkoutDayExercisesViewModel.PlannedExerciseViewModel model, int workoutDayId)
         {
             try
             {

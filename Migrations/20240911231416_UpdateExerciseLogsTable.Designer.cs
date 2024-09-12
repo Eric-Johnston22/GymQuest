@@ -4,6 +4,7 @@ using GymQuest.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GymQuest.Migrations
 {
     [DbContext(typeof(GymQuestDbContext))]
-    partial class GymQuestDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240911231416_UpdateExerciseLogsTable")]
+    partial class UpdateExerciseLogsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -49,13 +52,16 @@ namespace GymQuest.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<bool>("IsSuccessful")
                         .HasColumnType("bit");
 
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("PlannedExercisesId")
+                    b.Property<int>("PlannedExerciseId")
                         .HasColumnType("int");
 
                     b.Property<int>("RepsCompleted")
@@ -65,7 +71,7 @@ namespace GymQuest.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Weight")
                         .HasPrecision(18, 2)
@@ -73,9 +79,9 @@ namespace GymQuest.Migrations
 
                     b.HasKey("LogId");
 
-                    b.HasIndex("PlannedExercisesId");
+                    b.HasIndex("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("PlannedExerciseId");
 
                     b.ToTable("ExerciseLogs");
                 });
@@ -150,9 +156,6 @@ namespace GymQuest.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("CurrentWorkoutRoutineId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -202,10 +205,6 @@ namespace GymQuest.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CurrentWorkoutRoutineId")
-                        .IsUnique()
-                        .HasFilter("[CurrentWorkoutRoutineId] IS NOT NULL");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -276,9 +275,11 @@ namespace GymQuest.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("WorkoutRoutineId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("WorkoutRoutines");
                 });
@@ -418,15 +419,15 @@ namespace GymQuest.Migrations
 
             modelBuilder.Entity("GymQuest.Models.ExerciseLogs", b =>
                 {
-                    b.HasOne("GymQuest.Models.PlannedExercises", "PlannedExercises")
-                        .WithMany()
-                        .HasForeignKey("PlannedExercisesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("GymQuest.Models.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("Id");
+
+                    b.HasOne("GymQuest.Models.PlannedExercises", "PlannedExercises")
+                        .WithMany()
+                        .HasForeignKey("PlannedExerciseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("PlannedExercises");
 
@@ -452,15 +453,6 @@ namespace GymQuest.Migrations
                     b.Navigation("WorkoutDays");
                 });
 
-            modelBuilder.Entity("GymQuest.Models.User", b =>
-                {
-                    b.HasOne("GymQuest.Models.WorkoutRoutines", "CurrentWorkoutRoutine")
-                        .WithOne("User")
-                        .HasForeignKey("GymQuest.Models.User", "CurrentWorkoutRoutineId");
-
-                    b.Navigation("CurrentWorkoutRoutine");
-                });
-
             modelBuilder.Entity("GymQuest.Models.WorkoutDays", b =>
                 {
                     b.HasOne("GymQuest.Models.DaysOfWeek", "DaysOfWeek")
@@ -482,6 +474,15 @@ namespace GymQuest.Migrations
                     b.Navigation("DaysOfWeek");
 
                     b.Navigation("WorkoutRoutine");
+                });
+
+            modelBuilder.Entity("GymQuest.Models.WorkoutRoutines", b =>
+                {
+                    b.HasOne("GymQuest.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -547,8 +548,6 @@ namespace GymQuest.Migrations
 
             modelBuilder.Entity("GymQuest.Models.WorkoutRoutines", b =>
                 {
-                    b.Navigation("User");
-
                     b.Navigation("WorkoutDays");
                 });
 #pragma warning restore 612, 618

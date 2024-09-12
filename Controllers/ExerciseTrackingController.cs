@@ -3,6 +3,7 @@ using GymQuest.Models;
 using GymQuest.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
 
 namespace GymQuest.Controllers
 {
@@ -10,11 +11,13 @@ namespace GymQuest.Controllers
     {
         private readonly WorkoutService _workoutService;
         private readonly ExerciseTrackingService _exerciseTrackingService;
+        private readonly UserService _userService;
 
-        public ExerciseTrackingController(WorkoutService workoutService, ExerciseTrackingService exerciseTrackingService)
+        public ExerciseTrackingController(WorkoutService workoutService, ExerciseTrackingService exerciseTrackingService, UserService userService)
         {
             _workoutService = workoutService;
             _exerciseTrackingService = exerciseTrackingService;
+            _userService = userService;
         }
 
         // Start a workout session based on the current day
@@ -25,6 +28,13 @@ namespace GymQuest.Controllers
             if (workoutRoutine == null)
             {
                 return NotFound();
+            }
+
+            // Fetch the currently logged-in user
+            var userId = await _userService.GetUserIdAsync(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(); // Handle unauthorized access
             }
 
             var currentDayOfWeek = DateTime.Now.DayOfWeek.ToString();
@@ -57,7 +67,7 @@ namespace GymQuest.Controllers
                 DayName = workoutDay.DaysOfWeek.DayName,
                 PlannedExercises = workoutDay.PlannedExercises.Select(ex => new ExerciseLogViewModel
                 {
-                    PlannedExerciseId = ex.PlannedExercisesId,
+                    PlannedExercisesId = ex.PlannedExercisesId,
                     ExerciseName = ex.Exercises.Name,
                     SetNumber = 0, // Initialize to 0, increment as needed
                     Reps = ex.Reps,
@@ -81,7 +91,7 @@ namespace GymQuest.Controllers
                     {
                         var exerciseLog = new ExerciseLogs
                         {
-                            PlannedExerciseId = log.PlannedExerciseId,
+                            PlannedExercisesId = log.PlannedExercisesId,
                             UserId = userId,
                             Date = DateTime.Now,
                             SetNumber = set,

@@ -30,6 +30,11 @@ namespace GymQuest.Services
             return await _signInManager.PasswordSignInAsync(email, password, rememberMe, lockoutOnFailure);
         }
         
+        public async Task<string> GetUserIdAsync(ClaimsPrincipal user)
+        {
+            var appUser = await _userManager.GetUserAsync(user);
+            return appUser.Id;
+        }
 
         public async Task<string> GetFirstNameAsync(ClaimsPrincipal user)
         {

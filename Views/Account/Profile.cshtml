@@ -4,7 +4,9 @@
 
 @{
     ViewBag.Title = "Profile";
-    var firstName = Model.FirstOrDefault().User.FirstName;
+    //var firstName = Model.FirstOrDefault().User; // Default to "Guest" if null
+    var firstName = ViewBag.FirstName;
+
 }
 
 <div row>
@@ -12,9 +14,10 @@
     <div class="col-md-12">
         <ul class="flex-grow-1">
             <li class="list-group-item">
+                
                 @if (firstName == "dylan" || firstName == "Dylan")
                 {
-                    <p>Well well well. If it isn't Dylan Sedmak.</p>
+                    <p>Well well well. If it isn't Dylbo Baggins...</p>
                 }
                 else
                 {
@@ -40,6 +43,7 @@
         {
             <ul>
                 <a asp-controller="Workout" asp-route-id="@routine.WorkoutRoutineId" asp-action="ViewRoutine">@routine.RoutineName</a>
+                
             </ul>
         }
     </div>

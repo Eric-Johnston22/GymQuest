@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GymQuest.Migrations
 {
     [DbContext(typeof(GymQuestDbContext))]
-    [Migration("20240822224448_UpdateExerciseLogsModel")]
-    partial class UpdateExerciseLogsModel
+    [Migration("20240912014259_UpdateExerciseLogsForeignKeys")]
+    partial class UpdateExerciseLogsForeignKeys
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -58,10 +58,7 @@ namespace GymQuest.Migrations
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("PlannedExerciseId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("PlannedExercisesId")
+                    b.Property<int>("PlannedExercisesId")
                         .HasColumnType("int");
 
                     b.Property<int>("RepsCompleted")
@@ -421,7 +418,9 @@ namespace GymQuest.Migrations
                 {
                     b.HasOne("GymQuest.Models.PlannedExercises", "PlannedExercises")
                         .WithMany()
-                        .HasForeignKey("PlannedExercisesId");
+                        .HasForeignKey("PlannedExercisesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("GymQuest.Models.User", "User")
                         .WithMany()
