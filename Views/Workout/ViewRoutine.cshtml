@@ -4,27 +4,38 @@
 <p><strong>Cycle Days:</strong> @Model.CycleDays</p>
 <p><strong>Is Cyclical:</strong> @(Model.IsCycle ? "Yes" : "No")</p>
 
-@foreach (var day in Model.WorkoutDays)
-{
-    <h3>@day.DayName</h3>
-    <ul>
-        @foreach (var exercise in day.Exercises)
+<div class="container">
+    <div class="row">
+        @foreach (var day in Model.WorkoutDays)
         {
-            <li>
-                @exercise.ExerciseName - @exercise.Sets sets of @exercise.Reps reps at @exercise.Weight lbs
-                @if (!string.IsNullOrEmpty(exercise.Notes))
+            <h3>@day.DayName</h3>
+            <ul>
+                @foreach (var exercise in day.Exercises)
                 {
-                    <br />
+                    <li>
+                        @exercise.ExerciseName - @exercise.Sets sets of @exercise.Reps reps at @exercise.Weight lbs
+                        @if (!string.IsNullOrEmpty(exercise.Notes))
+                        {
+                            <br />
 
-                    <strong>Notes:</strong> @exercise.Notes
+                            <strong>Notes:</strong> @exercise.Notes
+                        }
+                    </li>
                 }
-            </li>
+            </ul>
         }
-    </ul>
-}
+    </div>
 
-<a asp-action="EditRoutine" asp-route-id="@Model.WorkoutRoutineId" class="btn btn-primary">Edit Routine</a>
-<a asp-action="StartRoutine" method="post">
-    <input type="hidden" name="routineId" value="@Model.WorkoutRoutineId" />
-    <button type="submit" class="btn btn-primary">Start Routine</button>
-</a>
+    <div class="row">
+        <div class="col-sm-2">
+            <a asp-action="EditRoutine" asp-route-id="@Model.WorkoutRoutineId" class="btn btn-primary">Edit Routine</a>
+        </div>
+        <div class="col-sm-2">
+            <form asp-action="StartRoutine" asp-controller="ExerciseTracking" method="post">
+                <input type="hidden" name="routineId" value="@Model.WorkoutRoutineId" />
+                <button type="submit" class="btn btn-primary">Start Routine</button>
+            </form>
+        </div>
+    </div>
+</div>
+

@@ -40,5 +40,10 @@ namespace GymQuest.Services
             await _exerciseTrackingRepository.AddPlannedExerciseAsync(exercise);
         }
 
+        public async Task SetCurrentRoutineAsync(string userId, int routineId)
+        {
+            await _exerciseTrackingRepository.SetCurrentRoutine(userId, routineId);
+        }
+
     }
 }

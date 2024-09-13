@@ -6,7 +6,8 @@
     ViewBag.Title = "Profile";
     //var firstName = Model.FirstOrDefault().User; // Default to "Guest" if null
     var firstName = ViewBag.FirstName;
-
+    var currentRoutine = ViewBag.CurrentRoutine;
+    var currRtn = Model.FirstOrDefault().User.CurrentWorkoutRoutineId; // ****** FIGURE OUT WHY USER US NULL ******
 }
 
 <div row>
@@ -22,6 +23,7 @@
                 else
                 {
                     <p>First name: @firstName</p>
+                    <p>Current routine: @currRtn</p>
                 }
             </li>
             <li class="list-group-item">
@@ -42,8 +44,14 @@
         @foreach(var routine in Model)
         {
             <ul>
-                <a asp-controller="Workout" asp-route-id="@routine.WorkoutRoutineId" asp-action="ViewRoutine">@routine.RoutineName</a>
-                
+                @if(routine.WorkoutRoutineId == currentRoutine)
+                {
+                    <a asp-controller="Workout" asp-route-id="@routine.WorkoutRoutineId" asp-action="ViewRoutine">@routine.RoutineName</a> <p>Your current routine</p>
+                }
+                else
+                {
+                    <a asp-controller="Workout" asp-route-id="@routine.WorkoutRoutineId" asp-action="ViewRoutine">@routine.RoutineName</a>
+                }
             </ul>
         }
     </div>

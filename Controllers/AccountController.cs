@@ -121,6 +121,7 @@ namespace GymQuest.Controllers
             ViewBag.LastName = userData.LastName;
             ViewBag.Email = userData.Email;
             ViewBag.Exercises = workoutRoutines;
+            ViewBag.CurrentRoutine = userData.CurrentWorkoutRoutineId;
             return View(workoutRoutines);
         }
     }

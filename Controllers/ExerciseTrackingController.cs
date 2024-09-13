@@ -21,7 +21,7 @@ namespace GymQuest.Controllers
         }
 
         // Start a workout session based on the current day
-        [HttpGet]
+        [HttpPost]
         public async Task<IActionResult> StartRoutine(int routineId)
         {
             var workoutRoutine = await _workoutService.GetWorkoutRoutineByIdAsync(routineId);
@@ -36,6 +36,10 @@ namespace GymQuest.Controllers
             {
                 return Unauthorized(); // Handle unauthorized access
             }
+
+            // Update the user's current routine
+            await _exerciseTrackingService.SetCurrentRoutineAsync(userId, routineId);
+
 
             var currentDayOfWeek = DateTime.Now.DayOfWeek.ToString();
             var exercises = await _workoutService.GetExercisesAsync();

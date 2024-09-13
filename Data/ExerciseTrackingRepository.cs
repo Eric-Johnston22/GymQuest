@@ -42,5 +42,15 @@ namespace GymQuest.Data
             _context.PlannedExercises.Add(exercise);
             await _context.SaveChangesAsync();
         }
+
+        public async Task SetCurrentRoutine(string userId, int routineId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user != null)
+            {
+                user.CurrentWorkoutRoutineId = routineId;
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }
