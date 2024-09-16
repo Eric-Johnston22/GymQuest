@@ -73,9 +73,11 @@ namespace GymQuest.Controllers
                 {
                     PlannedExercisesId = ex.PlannedExercisesId,
                     ExerciseName = ex.Exercises.Name,
+                    Sets = ex.Sets,
                     SetNumber = 0, // Initialize to 0, increment as needed
-                    Reps = ex.Reps,
-                    Weight = ex.Weight
+                    GoalReps = ex.Reps,
+                    Weight = ex.Weight,
+                    Notes = null
                 }).ToList()
             };
 
@@ -84,34 +86,28 @@ namespace GymQuest.Controllers
 
         // Log the exercises for the current session
         [HttpPost]
-        public async Task<IActionResult> LogExercises(StartRoutineViewModel model)
+        public async Task<IActionResult> LogExercise(int plannedExercisesId, int goalSets, int goalReps, int weight, int setNumber, int repsCompleted, string? notes)
         {
-            if (ModelState.IsValid)
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // Log for debugging
+            Console.WriteLine($"\n\nLogging Exercise: PlannedExercisesId: {plannedExercisesId}, GoalReps: {goalReps}, Weight: {weight}, SetNumber: {setNumber}, RepsCompleted: {repsCompleted}, Notes: {notes}\n\n");
+
+            var exerciseLog = new ExerciseLogs
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                foreach (var log in model.PlannedExercises)
-                {
-                    for (int set = 1; set <= log.Sets; set++)
-                    {
-                        var exerciseLog = new ExerciseLogs
-                        {
-                            PlannedExercisesId = log.PlannedExercisesId,
-                            UserId = userId,
-                            Date = DateTime.Now,
-                            SetNumber = set,
-                            RepsCompleted = log.IsSuccessful ? log.Reps : log.FailedRep ?? 0,
-                            Weight = log.Weight,
-                            IsSuccessful = log.IsSuccessful
-                        };
+                PlannedExercisesId = plannedExercisesId,
+                UserId = userId,
+                Date = DateTime.Now,
+                Sets = goalSets,
+                Reps = goalReps,
+                Weight = weight,
+                SetNumber = setNumber,
+                RepsCompleted = repsCompleted,
+                Notes = notes, // Save notes
+            };
 
-                        await _exerciseTrackingService.LogExerciseAsync(exerciseLog);
-                    }
-                }
+            await _exerciseTrackingService.LogExerciseAsync(exerciseLog);
 
-                return RedirectToAction("ViewRoutine", "Workout", new { id = model.WorkoutRoutineId });
-            }
-
-            return View("StartRoutine", model);
+            return Ok(); // Indicate success
         }
 
         // Allow users to add new exercises to an existing day
@@ -192,6 +188,14 @@ namespace GymQuest.Controllers
             return Json(new { exerciseId = exercise.ExerciseId, name = exercise.Name });
         }
 
+        [HttpPost]
+        public async Task<IActionResult> EndWorkout(int routineId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var workoutSummary = await _exerciseTrackingService.GetWorkoutSummaryAsync(userId, routineId);
+
+            return View("WorkoutSummary", workoutSummary);
+        }
 
     }
 }

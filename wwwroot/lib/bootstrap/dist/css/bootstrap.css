@@ -237,6 +237,26 @@
     --bs-form-invalid-border-color: #dc143c;
 }
 
+/* Use a dark gray for table borders */
+[data-theme-midnight-blue] .exercise-separator {
+    border-top: 4px solid #69696f; /* Dark gray */
+}
+
+[data-theme-midnight-blue] .table thead th {
+    background-color: var(--bs-primary-bg-subtle); /* Keep the same subtle primary background */
+    color: var(--bs-body-color); /* Use the main body color for contrast */
+}
+
+[data-theme-midnight-blue] .table-bordered td,
+[data-theme-midnight-blue] .table-bordered th {
+    border-color: #69696f; /* Dark gray for table cell borders */
+}
+
+/* Hover effect to match your theme */
+[data-theme-midnight-blue] .table tbody tr:hover {
+    background-color: var(--bs-secondary-bg-subtle); /* Subtle secondary background for hover effect */
+}
+
 
 *,
 *::before,

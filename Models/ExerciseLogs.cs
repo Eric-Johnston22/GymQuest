@@ -14,6 +14,8 @@ namespace GymQuest.Models
         public int PlannedExercisesId { get; set; }
 
         public DateTime Date { get; set; }
+        public int Sets { get; set; } // Goal sets
+        public int Reps { get; set; } // Goal reps
         public int SetNumber { get; set; } // The specific set number being logged
         public int RepsCompleted { get; set; } // Number of reps completed in this set
         public decimal Weight { get; set; }

@@ -13,44 +13,55 @@
     <button type="button" class="btn btn-secondary" onclick="openAddExerciseModal('@Model.DayName')">Add Exercise</button>
 }
 
-@foreach (var exercise in Model.PlannedExercises)
-{
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Exercise</th>
-                <th>Set</th>
-                <th>Reps</th>
-                <th>Weight (lbs)</th>
-                <th>Completed</th>
-                <th>Failed Rep</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var e in Model.PlannedExercises)
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Exercise</th>
+            <th>Set</th>
+            <th>Goal Reps</th>
+            <th>Weight (lbs)</th>
+            <th>Reps Completed</th>
+            <th>Notes</th>
+            <th>Save Set</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var exercise in Model.PlannedExercises)
+        {
+            for (int set = 1; set <= exercise.Sets; set++)
             {
-                for (int set = 1; set <= exercise.Sets; set++)
-                {
-                    <tr>
-                        @if (set == 1)
-                        {
-                            <td rowspan="@exercise.Sets">@exercise.ExerciseName</td>
-                        }
-                        <td>@set</td>
-                        <td>@exercise.Reps</td>
-                        <td>@exercise.Weight</td>
-                        <td>
-                            <input type="checkbox" asp-for="@exercise.IsSuccessful" name="isSuccessful[@exercise.PlannedExercisesId][@set]" />
+                <tr class="@(set == 1 ? "exercise-separator" : "")">
+                    @if (set == 1)
+                    {
+                        <td rowspan="@exercise.Sets" style="max-width: 100px; word-wrap: break-word; overflow-wrap: break-word;">
+                            @exercise.ExerciseName
                         </td>
-                        <td>
-                            <input type="number" asp-for="@exercise.FailedRep" name="failedRep[@exercise.PlannedExercisesId][@set]" min="0" max="@exercise.Reps" class="form-control" />
-                        </td>
-                    </tr>
-                }
+                    }
+                    
+                    <td>@set</td>
+                    <td>@exercise.GoalReps</td>
+                    <td>@exercise.Weight</td>
+                    <td>
+                        <input type="number" asp-for="@exercise.RepsCompleted" id="actualReps[@exercise.PlannedExercisesId][@set]" min="0" max="@exercise.GoalReps" class="form-control"/>
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" id="notes[@exercise.PlannedExercisesId][@set]" placeholder="Add notes (optional)" />
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-success" onclick="saveSet(@exercise.PlannedExercisesId, @set, @exercise.GoalReps, @exercise.Weight, @exercise.Sets)">Save Set</button>
+                    </td>
+                </tr>
             }
-        </tbody>
-    </table>
-}
+        }
+    </tbody>
+</table>
+
+<!-- Form to end the workout -->
+<form asp-action="EndWorkout" method="post">
+    <input type="hidden" name="routineId" value="@Model.WorkoutRoutineId" />
+    <button type="submit" class="btn btn-primary">End Workout</button>
+</form>
+
 
 <!-- Modal for adding a new exercise -->
 <div class="modal fade" id="addExerciseModal" tabindex="-1" role="dialog" aria-labelledby="addExerciseModalLabel" aria-hidden="true">
@@ -143,37 +154,39 @@
             $('#createExerciseModal').modal('show');
         }
 
-        function saveExercise() {
-            var workoutRoutineId = $('#workoutRoutineId').val();
-            var dayName = $('#workoutDayName').val();
-            var exerciseId = $('#exerciseId').val();
-            var sets = $('#sets').val();
-            var reps = $('#reps').val();
-            var weight = $('#weight').val();
-            var notes = $('#notes').val();
+       function saveSet(plannedExerciseId, setNumber, goalReps, weight, goalSets) {
+            var repsCompleted = $('#actualReps\\[' + plannedExerciseId + '\\]\\[' + setNumber + '\\]').val(); // Retrieve completed reps
+            var notes = $('#notes\\[' + plannedExerciseId + '\\]\\[' + setNumber + '\\]').val(); // Retrieve notes
+            console.log(repsCompleted);
+            console.log(notes)
+            console.log(plannedExerciseId);
+            console.log(setNumber);
+            console.log(goalReps);
+            console.log(weight);
+
+
+            if (!repsCompleted) {
+                alert("Please enter the actual reps completed.");
+                return;
+            }
 
             $.ajax({
-                url: '@Url.Action("AddExerciseToDay", "ExerciseTracking")',
+                url: '@Url.Action("LogExercise", "ExerciseTracking")',
                 type: 'POST',
                 data: {
-                    workoutRoutineId: workoutRoutineId,
-                    dayName: dayName,
-                    exerciseId: exerciseId,
-                    sets: sets,
-                    reps: reps,
+                    plannedExercisesId: plannedExerciseId,
+                    goalSets: goalSets,
+                    goalReps: goalReps,
                     weight: weight,
-                    notes: notes
+                    setNumber: setNumber,
+                    repsCompleted: repsCompleted,
+                    notes: notes // Pass notes to the server
                 },
-                success: function (response) {
-                    // Append the new exercise to the correct day in the view
-                    $('#exerciseList-' + dayName).append('<li>' + response.exerciseName + ' - ' + sets + ' sets of ' + reps + ' reps at ' + weight + ' lbs</li>');
-                    $('#addExerciseModal').modal('hide');
+                success: function () {
+                    alert("Set logged successfully!");
                 },
-                error: function (xhr, status, error) {
-                    console.error('Error details:', xhr.responseText);
-                    console.error('Status:', status);
-                    console.error('Error:', error);
-                    alert("An error occurred while adding the exercise. Please try again.");
+                error: function () {
+                    alert("An error occurred while logging the set. Please try again.");
                 }
             });
         }

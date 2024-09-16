@@ -20,3 +20,7 @@ html {
 body {
     margin-bottom: 60px;
 }
+
+.exercise-separator {
+    border-top: 3px solid #000; /* Thicker border */
+}

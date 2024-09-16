@@ -50,6 +50,7 @@ namespace GymQuest
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+            app.UseDeveloperExceptionPage();
 
             app.UseRouting();
 

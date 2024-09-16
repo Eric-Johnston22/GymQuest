@@ -14,9 +14,29 @@ namespace GymQuest.Data
 
         public async Task LogExerciseAsync(ExerciseLogs exerciseLog)
         {
-            _context.ExerciseLogs.Add(exerciseLog);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.ExerciseLogs.Add(exerciseLog);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in LogExerciseAsync: {ex.Message}");
+                throw; // Re-throw the exception for higher-level handling
+            }
         }
+
+        public async Task<List<ExerciseLogs>> GetExerciseLogsByRoutineAsync(string userId, int routineId)
+        {
+            return await _context.ExerciseLogs
+                .Include(log => log.PlannedExercises)
+                    .ThenInclude(pe => pe.Exercises)
+                .Include(log => log.PlannedExercises.WorkoutDays)
+                    .ThenInclude(wd => wd.WorkoutRoutine)
+                .Where(log => log.UserId == userId && log.PlannedExercises.WorkoutDays.WorkoutRoutine.WorkoutRoutineId == routineId)
+                .ToListAsync();
+        }
+
 
         public async Task<ExerciseLogs?> GetExerciseLogByIdAsync(int logId)
         {

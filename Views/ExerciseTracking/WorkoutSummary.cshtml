@@ -1,0 +1,37 @@
+﻿@model GymQuest.Models.ViewModels.WorkoutSummaryViewModel
+
+<h2>@Model.RoutineName - Workout Summary for @Model.WorkoutDate.ToString("MMMM dd, yyyy")</h2>
+
+@foreach (var exercise in Model.Exercises)
+{
+    <h3>@exercise.ExerciseName</h3>
+    <p>Total Sets: @exercise.TotalSets</p>
+    <p>Total Reps: @exercise.TotalReps</p>
+    <p>Max Weight: @exercise.MaxWeight lbs</p>
+    @if (exercise.IsPR)
+    {
+        <p><strong>New Personal Record!</strong></p>
+    }
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Set Number</th>
+                <th>Reps Completed</th>
+                <th>Weight (lbs)</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var set in exercise.Sets)
+            {
+                <tr>
+                    <td>@set.SetNumber</td>
+                    <td>@set.RepsCompleted</td>
+                    <td>@set.Weight</td>
+                    <td>@set.Notes</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

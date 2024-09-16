@@ -49,6 +49,11 @@ namespace GymQuest.Models
                 .HasOne(u => u.CurrentWorkoutRoutine)
                 .WithOne(wr => wr.User)
                 .HasForeignKey<User>(u => u.CurrentWorkoutRoutineId); // Explicitly specify the foreign key property
+
+            // Example configuration if necessary
+            builder.Entity<ExerciseLogs>()
+                .Property(e => e.RepsCompleted)
+                .HasColumnType("int");
         }
     }
 }
