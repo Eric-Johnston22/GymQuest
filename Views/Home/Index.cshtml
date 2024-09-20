@@ -1,15 +1,37 @@
-﻿@model GymQuest.Models.User
+﻿@model GymQuest.Models.ViewModels.HomeViewModel;
 @using Microsoft.AspNetCore.Identity
 @inject SignInManager<User> SignInManager
 @inject UserManager<User> UserManager
 @{
     ViewData["Title"] = "Home Page";
+    string currentRtn;
+    int currentRtnId;
+    if (Model != null && Model.CurrentRoutine != null)
+    {
+        currentRtn = Model.CurrentRoutine.RoutineName;
+        currentRtnId = Model.CurrentRoutine.WorkoutRoutineId;
+    }
+    else
+    {
+        currentRtn = null;
+        currentRtnId = -1;
+    }
+    System.Diagnostics.Debug.WriteLine(currentRtn);
 }
 
 <div class="text-center">
     @if (SignInManager.IsSignedIn(User))
     {
-        <h1 class="display-4">Welcome, @ViewBag.FirstName</h1>
+        <h1 class="display-4">Welcome, @Model.FirstName</h1>
+        @if (Model != null && Model.CurrentRoutine != null)
+        {
+            <h4>Your current routine is:</h4>
+            <h2>
+                <a asp-action="StartRoutine" asp-controller="ExerciseTracking" asp-route-RoutineId="@currentRtnId">
+                    @currentRtn
+                </a>
+            </h2>
+        }
         <h2><a asp-controller="Workout" asp-action="CreateRoutine">Create a routine!</a></h2>
     }
     else

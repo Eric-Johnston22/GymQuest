@@ -21,7 +21,7 @@ namespace GymQuest.Data
             return routine.WorkoutRoutineId; // Return ID for controller redirect
         }
 
-        public async Task<WorkoutRoutines?> GetWorkoutRoutineByIdAsync(int id)
+        public async Task<WorkoutRoutines?> GetWorkoutRoutineByIdAsync(int? id)
         {
             return await _context.WorkoutRoutines
                          .Include(wr => wr.WorkoutDays)

@@ -49,5 +49,7 @@ namespace GymQuest.Services
 
             return currentUser!;
         }
+
+
     }
 }

@@ -20,9 +20,73 @@ namespace GymQuest.Controllers
             _userService = userService;
         }
 
-        // Start a workout session based on the current day
-        [HttpPost]
-        public async Task<IActionResult> StartRoutine(int routineId)
+        // POST: Start a workout session based on the current day
+        [HttpPost, ActionName("StartRoutine")]
+        public async Task<IActionResult> StartRoutinePost(int routineId)
+        {
+            var workoutRoutine = await _workoutService.GetWorkoutRoutineByIdAsync(routineId);
+            if (workoutRoutine == null)
+            {
+                return NotFound();
+            }
+
+            // Fetch the currently logged-in user
+            var userId = await _userService.GetUserIdAsync(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(); // Handle unauthorized access
+            }
+
+            // Update the user's current routine
+            await _exerciseTrackingService.SetCurrentRoutineAsync(userId, routineId);
+
+
+            var currentDayOfWeek = DateTime.Now.DayOfWeek.ToString();
+            var exercises = await _workoutService.GetExercisesAsync();
+            ViewBag.Exercises = exercises;
+
+            var workoutDay = workoutRoutine.WorkoutDays
+                .FirstOrDefault(day => day.DaysOfWeek.DayName == currentDayOfWeek);
+
+            if (workoutDay == null)
+            {
+                // Pass a flag indicating no exercises are planned for the day
+                var startRoutineModel = new StartRoutineViewModel
+                {
+                    WorkoutRoutineId = workoutRoutine.WorkoutRoutineId,
+                    RoutineName = workoutRoutine.RoutineName,
+                    DayName = workoutDay?.DaysOfWeek?.DayName ?? currentDayOfWeek,
+                    PlannedExercises = new List<ExerciseLogViewModel>() // No planned exercises
+                };
+
+                ViewBag.NoExercisesPlanned = true; // Set a flag to show the option to add exercises
+
+                return View(startRoutineModel);
+            }
+
+            var model = new StartRoutineViewModel
+            {
+                WorkoutRoutineId = workoutRoutine.WorkoutRoutineId,
+                RoutineName = workoutRoutine.RoutineName,
+                DayName = workoutDay.DaysOfWeek.DayName,
+                PlannedExercises = workoutDay.PlannedExercises.Select(ex => new ExerciseLogViewModel
+                {
+                    PlannedExercisesId = ex.PlannedExercisesId,
+                    ExerciseName = ex.Exercises.Name,
+                    Sets = ex.Sets,
+                    SetNumber = 0, // Initialize to 0, increment as needed
+                    GoalReps = ex.Reps,
+                    Weight = ex.Weight,
+                    Notes = null
+                }).ToList()
+            };
+
+            return View(model);
+        }
+
+        // GET: Start a workout session based on the current day
+        [HttpGet, ActionName("StartRoutine")]
+        public async Task<IActionResult> StartRoutineGet(int routineId)
         {
             var workoutRoutine = await _workoutService.GetWorkoutRoutineByIdAsync(routineId);
             if (workoutRoutine == null)

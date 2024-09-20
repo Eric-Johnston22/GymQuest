@@ -13,22 +13,38 @@ namespace GymQuest.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly UserManager<User> _userManager;
         private readonly UserService _userService;
+        private readonly WorkoutService _workoutService;
 
-        public HomeController(ILogger<HomeController> logger, UserManager<User> userManager, UserService userService)
+        public HomeController(ILogger<HomeController> logger, UserManager<User> userManager, UserService userService, WorkoutService workoutService)
         {
             _logger = logger;
             _userManager = userManager;
             _userService = userService;
+            _workoutService = workoutService;
         }
 
         
 
         public async Task<IActionResult> Index()
         {
-            string firstName = await _userService.GetFirstNameAsync(User);
-            ViewBag.FirstName = firstName;
+            // Get the logged-in user
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return View(); // Return an empty view if no user is logged in
+            }
 
-            return View();
+            // Retrive current routine for logged-in user
+            var currentRoutine = await _workoutService.GetWorkoutRoutineByIdAsync(user.CurrentWorkoutRoutineId);
+
+            // Create the view model
+            var model = new HomeViewModel
+            {
+                FirstName = user.FirstName,
+                CurrentRoutine = currentRoutine
+            };
+
+            return View(model);
         }
 
         public IActionResult Privacy()

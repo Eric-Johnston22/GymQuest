@@ -136,8 +136,12 @@ namespace GymQuest.Services
         }
 
 
-        public async Task<WorkoutRoutines?> GetWorkoutRoutineByIdAsync(int id)
+        public async Task<WorkoutRoutines?> GetWorkoutRoutineByIdAsync(int? id)
         {
+            if (id == null)
+            {
+                return null;
+            }
             return await _workoutRepository.GetWorkoutRoutineByIdAsync(id);
         }
 

@@ -14,6 +14,6 @@ namespace GymQuest.DataAccess
             _context = context;
             _userManager = userManager;
         }
-
+        
     }
 }
