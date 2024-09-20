@@ -8,7 +8,7 @@
 
 <div class="row">
     <div class="col-md-12">
-        <form method="post">
+        <form id="registerForm" method="post">
             <div asp-validation-summary="All" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="FirstName">First Name</label>
@@ -39,3 +39,41 @@
         </form>
     </div>
 </div>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#registerForm').submit(function (event) {
+                event.preventDefault(); // Prevent the default form submit
+
+                // Check if form is valid before submitting via AJAX
+                if ($(this).valid()) {
+                    var formData = $(this).serialize(); // Get the form data
+
+                    $.ajax({
+                        url: '@Url.Action("Register", "Account")', // Set the correct action and controller
+                        type: 'POST',
+                        data: formData,
+                        success: function (response) {
+                            if (response.success) {
+                                // Redirect to a new page on successful registration
+                                window.location.href = response.redirectUrl;
+                            } else {
+                                // Handle validation errors and update the validation summary
+                                var validationSummary = $('.validation-summary-valid');
+                                validationSummary.html(''); // Clear previous errors
+                                $.each(response.errors, function (key, value) {
+                                    validationSummary.append('<li>' + value + '</li>');
+                                });
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('An error occurred: ' + error);
+                        }
+                    });
+                }
+            });
+        });
+
+    </script>
+}

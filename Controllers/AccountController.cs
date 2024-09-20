@@ -56,7 +56,17 @@ namespace GymQuest.Controllers
                 // SignInManager and redirect to index action of HomeController
                 if (result.Succeeded)
                 {
+
                     await _userService.SignInUserAsync(user, isPersistant: false);
+
+                    // Check if the request is an AJAX request
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    {
+                        // If it's an AJAx request, return success as JSON
+                        return Json(new { success = true, redirectUrl = Url.Action("Index", "Home") });
+                    }
+
+                    // Otherwise, return the normal redirect
                     return RedirectToAction("index", "home");
                 }
 
@@ -68,6 +78,16 @@ namespace GymQuest.Controllers
                 }
             }
 
+            // Handle validation errors for AJAX requests
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors)
+                                              .Select(e => e.ErrorMessage)
+                                              .ToList();
+                return Json(new { success = false, errors });
+            }
+
+            // If it's not an AJAX request, return the standard view with errors
             return View(model);
         }
 
