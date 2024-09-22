@@ -181,6 +181,37 @@ namespace GymQuest.Controllers
             return BadRequest("Invalid data provided.");
         }
 
+        [HttpPost]
+        public async Task<IActionResult> AddExerciseToDay(int workoutRoutineId, string dayName, int exerciseId, int sets, int reps, decimal weight, string? notes)
+        {
+            var workoutRoutine = await _workoutService.GetWorkoutRoutineByIdAsync(workoutRoutineId);
+            if (workoutRoutine == null)
+            {
+                return NotFound();
+            }
+
+            var workoutDay = workoutRoutine.WorkoutDays.FirstOrDefault(d => d.DaysOfWeek.DayName == dayName);
+            if (workoutDay == null)
+            {
+                return NotFound();
+            }
+
+            var plannedExercise = new PlannedExercises
+            {
+                WorkoutDayId = workoutDay.WorkoutDayId,
+                ExerciseId = exerciseId,
+                Sets = sets,
+                Reps = reps,
+                Weight = weight,
+                Notes = notes
+            };
+
+            await _workoutService.AddPlannedExerciseAsync(plannedExercise);
+
+            return Ok();
+        }
+
+
 
         // Step 4: Review and confirm
         [HttpGet]
@@ -217,6 +248,9 @@ namespace GymQuest.Controllers
                 return NotFound();
             }
 
+            var exercises = await _workoutService.GetExercisesAsync();
+            ViewBag.Exercises = exercises;
+
             var model = new ViewRoutineViewModel
             {
                 WorkoutRoutineId = workoutRoutine.WorkoutRoutineId,
@@ -229,6 +263,8 @@ namespace GymQuest.Controllers
                     Exercises = day.PlannedExercises.Select(ex => new ViewRoutineExerciseViewModel
                     {
                         ExerciseName = ex.Exercises?.Name,
+                        ExerciseId = ex.ExerciseId,
+                        PlannedExerciseId = ex.PlannedExercisesId,
                         Sets = ex.Sets,
                         Reps = ex.Reps,
                         Weight = ex.Weight,
@@ -239,6 +275,47 @@ namespace GymQuest.Controllers
 
             return View(model);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateExercise(int plannedExercisesId, string exerciseName, int sets, int reps, decimal weight)
+        {
+            var plannedExercise = await _workoutService.GetPlannedExerciseByIdAsync(plannedExercisesId);
+            if (plannedExercise == null)
+            {
+                return NotFound();
+            }
+
+            // Update the planned exercise with the new values
+            plannedExercise.Exercises.Name = exerciseName;
+            plannedExercise.Sets = sets;
+            plannedExercise.Reps = reps;
+            plannedExercise.Weight = weight;
+
+            await _workoutService.UpdatePlannedExerciseAsync(plannedExercise);
+
+            // Return the updated exercise data as JSON
+            return Json(new
+            {
+                exerciseName = plannedExercise.Exercises.Name,
+                sets = plannedExercise.Sets,
+                reps = plannedExercise.Reps,
+                weight = plannedExercise.Weight
+            });
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> RemoveExercise(int plannedExercisesId)
+        {
+            var result = await _workoutService.RemovePlannedExerciseAsync(plannedExercisesId);
+            if (result)
+            {
+                return Ok(); // Success
+            }
+
+            return BadRequest(); // Error
+        }
+
 
     }
 }

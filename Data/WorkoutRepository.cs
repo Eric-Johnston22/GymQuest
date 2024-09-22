@@ -78,8 +78,31 @@ namespace GymQuest.Data
 
         public async Task AddPlannedExerciseAsync(PlannedExercises plannedExercise)
         {
-            await _context.PlannedExercises.AddAsync(plannedExercise);
+            _context.PlannedExercises.Add(plannedExercise);
             await _context.SaveChangesAsync();
+        }
+
+
+        public async Task<PlannedExercises?> GetPlannedExerciseByIdAsync(int plannedExercisesId)
+        {
+            return await _context.PlannedExercises
+                         .Include(pe => pe.Exercises)
+                         .FirstOrDefaultAsync(pe => pe.PlannedExercisesId == plannedExercisesId);
+        }
+
+        public async Task UpdatePlannedExerciseAsync(PlannedExercises plannedExercise)
+        {
+            _context.PlannedExercises.Update(plannedExercise);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<bool> RemovePlannedExerciseAsync(int plannedExercisesId)
+        {
+            var exercise = await _context.PlannedExercises.FindAsync(plannedExercisesId);
+            if (exercise == null) return false;
+
+            _context.PlannedExercises.Remove(exercise);
+            return await _context.SaveChangesAsync() > 0;
         }
 
 

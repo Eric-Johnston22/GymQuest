@@ -164,5 +164,28 @@ namespace GymQuest.Services
         {
             return await _workoutRepository.GetExercisesAsync();
         }
+
+        public async Task UpdatePlannedExerciseAsync(PlannedExercises plannedExercise)
+        {
+            await _workoutRepository.UpdatePlannedExerciseAsync(plannedExercise);
+        }
+
+        public async Task<PlannedExercises> GetPlannedExerciseByIdAsync(int plannedExercisesId)
+        {
+            return await _workoutRepository.GetPlannedExerciseByIdAsync(plannedExercisesId);
+        }
+
+
+        public async Task<bool> RemovePlannedExerciseAsync(int plannedExercisesId)
+        {
+            return await _workoutRepository.RemovePlannedExerciseAsync(plannedExercisesId);
+        }
+
+        public async Task AddPlannedExerciseAsync(PlannedExercises plannedExercise)
+        {
+            await _workoutRepository.AddPlannedExerciseAsync(plannedExercise);
+        }
+
+
     }
 }

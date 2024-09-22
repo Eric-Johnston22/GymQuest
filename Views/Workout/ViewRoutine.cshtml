@@ -1,36 +1,77 @@
 ﻿@model GymQuest.Models.ViewModels.ViewRoutineViewModel
 
-<h2>@Model.RoutineName</h2>
-<p><strong>Cycle Days:</strong> @Model.CycleDays</p>
-<p><strong>Is Cyclical:</strong> @(Model.IsCycle ? "Yes" : "No")</p>
+@{
+    ViewData["Title"] = "View and Edit Routine";
+}
 
 <div class="container">
     <div class="row">
-        @foreach (var day in Model.WorkoutDays)
-        {
-            <h3>@day.DayName</h3>
-            <ul>
-                @foreach (var exercise in day.Exercises)
-                {
-                    <li>
-                        @exercise.ExerciseName - @exercise.Sets sets of @exercise.Reps reps at @exercise.Weight lbs
-                        @if (!string.IsNullOrEmpty(exercise.Notes))
-                        {
-                            <br />
-
-                            <strong>Notes:</strong> @exercise.Notes
-                        }
-                    </li>
-                }
-            </ul>
-        }
+        <div class="col">
+            <h2>@Model.RoutineName</h2>
+        </div>
     </div>
 
-    <div class="row">
-        <div class="col-sm-2">
-            <a asp-action="EditRoutine" asp-route-id="@Model.WorkoutRoutineId" class="btn btn-primary">Edit Routine</a>
+
+    @foreach (var day in Model.WorkoutDays)
+    {
+        <div class="card mt-3">
+            <div class="card-header">
+                <h4>@day.DayName</h4>
+            </div>
+            <div class="card-body">
+                @if (!day.Exercises.Any())
+                {
+                    <p>No exercises are planned for this day.</p>
+                }
+                else
+                {
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Exercise</th>
+                                <th>Sets</th>
+                                <th>Reps</th>
+                                <th>Weight (lbs)</th>
+                                <th>Edit</th>
+                                <th>Remove</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var exercise in day.Exercises)
+                            {
+                                <tr id="exerciseRow-@exercise.PlannedExerciseId">
+                                    <td>
+                                        <input type="text" id="exerciseName-@exercise.PlannedExerciseId" value="@exercise.ExerciseName" disabled class="form-control" />
+                                    </td>
+                                    <td>
+                                        <input type="number" id="sets-@exercise.PlannedExerciseId" value="@exercise.Sets" disabled class="form-control" />
+                                    </td>
+                                    <td>
+                                        <input type="number" id="reps-@exercise.PlannedExerciseId" value="@exercise.Reps" disabled class="form-control" />
+                                    </td>
+                                    <td>
+                                        <input type="number" id="weight-@exercise.PlannedExerciseId" value="@exercise.Weight" disabled class="form-control" />
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-warning" onclick="unlockExercise(@exercise.PlannedExerciseId)" id="unlockBtn-@exercise.PlannedExerciseId">Unlock</button>
+                                        <button class="btn btn-success d-none" id="saveBtn-@exercise.PlannedExerciseId" onclick="saveExercise(@exercise.PlannedExerciseId)">Save</button>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-danger" onclick="removeExercise(@exercise.PlannedExerciseId)">Remove</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    //Button to open modal to add a new exercise
+                    <button class="btn btn-secondary" onclick="openAddExerciseModal('@day.DayName', '@Model.WorkoutRoutineId')">Add Exercise</button>
+                }
+            </div>
         </div>
-        <div class="col-sm-2">
+    }
+    <br/>
+    <div class="row">
+        <div class="col-xs-1 justify-content-center">
             <form asp-action="StartRoutine" asp-controller="ExerciseTracking" method="post">
                 <input type="hidden" name="routineId" value="@Model.WorkoutRoutineId" />
                 <button type="submit" class="btn btn-primary">Start Routine</button>
@@ -38,4 +79,163 @@
         </div>
     </div>
 </div>
+
+
+<!-- Modal for adding a new exercise -->
+<div class="modal fade" id="addExerciseModal" tabindex="-1" role="dialog" aria-labelledby="addExerciseModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addExerciseModalLabel">Add New Exercise</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addExerciseForm">
+                    <input type="hidden" id="dayName" name="dayName" />
+                    <input type="hidden" id="workoutRoutineId" name="workoutRoutineId" />
+
+                    <div class="form-group">
+                        <label for="exerciseId">Exercise:</label>
+                        <select id="exerciseId" name="exerciseId" class="form-control">
+                            <option value="">-- Select Exercise --</option>
+                            @foreach (var exercise in ViewBag.Exercises)
+                            {
+                                <option value="@exercise.ExerciseId">@exercise.Name</option>
+                            }
+                        </select>
+                        <button type="button" class="btn btn-link" onclick="openCreateExerciseModal()">+ Create New Exercise</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sets">Sets:</label>
+                        <input type="number" id="sets" name="sets" class="form-control" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reps">Reps:</label>
+                        <input type="number" id="reps" name="reps" class="form-control" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="weight">Weight (lbs):</label>
+                        <input type="number" id="weight" name="weight" class="form-control" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">Notes (optional):</label>
+                        <textarea id="notes" name="notes" class="form-control"></textarea>
+                    </div>
+
+                    <button type="button" class="btn btn-primary" onclick="addExercise()">Save Exercise</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        function unlockExercise(exerciseId) {
+            $('#exerciseName-' + exerciseId).prop('disabled', false);
+            $('#sets-' + exerciseId).prop('disabled', false);
+            $('#reps-' + exerciseId).prop('disabled', false);
+            $('#weight-' + exerciseId).prop('disabled', false);
+            $('#saveBtn-' + exerciseId).removeClass('d-none');
+            $('#unlockBtn-' + exerciseId).addClass('d-none');
+        }
+
+        function saveExercise(plannedExercisesId) {
+            var exerciseName = $('#exerciseName-' + plannedExercisesId).val();
+            var sets = $('#sets-' + plannedExercisesId).val();
+            var reps = $('#reps-' + plannedExercisesId).val();
+            var weight = $('#weight-' + plannedExercisesId).val();
+
+            $.ajax({
+                url: '/Workout/UpdateExercise', // Adjust URL to match your controller/action
+                type: 'POST',
+                data: {
+                    plannedExercisesId: plannedExercisesId,
+                    exerciseName: exerciseName,
+                    sets: sets,
+                    reps: reps,
+                    weight: weight
+                },
+                success: function (response) {
+                    // Update the UI with the new values
+                    $('#exerciseName-' + plannedExercisesId).val(response.exerciseName);
+                    $('#sets-' + plannedExercisesId).val(response.sets);
+                    $('#reps-' + plannedExercisesId).val(response.reps);
+                    $('#weight-' + plannedExercisesId).val(response.weight);
+
+                    // Hide the save button / show unlock button and disable the inputs again
+                    $('#saveBtn-' + plannedExercisesId).addClass('d-none');
+                    $('#unlockBtn-' + plannedExercisesId).removeClass('d-none');
+                    $('#exerciseName-' + plannedExercisesId).prop('disabled', true);
+                    $('#sets-' + plannedExercisesId).prop('disabled', true);
+                    $('#reps-' + plannedExercisesId).prop('disabled', true);
+                    $('#weight-' + plannedExercisesId).prop('disabled', true);
+                },
+                    error: function (xhr, status, error) {
+                        alert('Error saving exercise: ' + error);
+                    }
+            });
+        }
+
+        function openAddExerciseModal(dayName, workoutRoutineId) {
+            $('#dayName').val(dayName);
+            $('#workoutRoutineId').val(workoutRoutineId);
+            $('#addExerciseModal').modal('show');
+        }
+
+        function addExercise() {
+            var dayName = $('#dayName').val();
+            var workoutRoutineId = $('#workoutRoutineId').val();
+            var exerciseId = $('#exerciseId').val();
+            var sets = $('#sets').val();
+            var reps = $('#reps').val();
+            var weight = $('#weight').val();
+            var notes = $('#notes').val();
+
+            $.ajax({
+                url: '/Workout/AddExerciseToDay', // Adjust the controller/action URL
+                type: 'POST',
+                data: {
+                    workoutRoutineId: workoutRoutineId,
+                    dayName: dayName,
+                    exerciseId: exerciseId,
+                    sets: sets,
+                    reps: reps,
+                    weight: weight,
+                    notes: notes
+                },
+                success: function (response) {
+                    // Append the new exercise to the correct day in the view
+                    location.reload(); // Reload page to show updated data
+                    $('#addExerciseModal').modal('hide');
+                },
+                error: function (xhr, status, error) {
+                    alert('Error adding exercise: ' + error);
+                }
+            });
+        }
+
+
+        function removeExercise(exerciseId) {
+            if (confirm("Are you sure you want to remove this exercise?")) {
+                $.ajax({
+                    url: '@Url.Action("RemoveExercise", "Workout")',
+                    type: 'POST',
+                    data: { plannedExercisesId: exerciseId },
+                    success: function(response) {
+                        alert("Exercise removed successfully.");
+                        location.reload();
+                    },
+                    error: function() {
+                        alert("An error occurred while removing the exercise.");
+                    }
+                });
+            }
+        }
+    </script>
+}
 
