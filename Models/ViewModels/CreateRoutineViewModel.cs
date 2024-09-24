@@ -2,14 +2,14 @@
 
 namespace GymQuest.Models.ViewModels
 {
-    public class CreateRoutineViewModel
-    {
+    //public class CreateRoutineViewModel
+    //{
 
-        [Required]
-        public string? RoutineName { get; set; }
-        public int CycleDays { get; set; }
-        [Required]
-        public bool IsCycle { get; set; }
+    //    [Required]
+    //    public string? RoutineName { get; set; }
+    //    public int CycleDays { get; set; }
+    //    [Required]
+    //    public bool IsCycle { get; set; }
 
-    }
+    //}
 }

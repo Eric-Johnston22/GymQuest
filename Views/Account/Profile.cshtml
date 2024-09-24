@@ -4,55 +4,66 @@
 
 @{
     ViewBag.Title = "Profile";
-    //var firstName = Model.FirstOrDefault().User; // Default to "Guest" if null
     var firstName = ViewBag.FirstName;
     var currentRoutine = ViewBag.CurrentRoutine;
-    //var currRtn = Model.FirstOrDefault().User.CurrentWorkoutRoutineId; // ****** FIGURE OUT WHY USER US NULL ******
 }
 
-<div row>
-
-    <div class="col-md-12">
-        <ul class="flex-grow-1">
-            <li class="list-group-item">
-                
-                @if (firstName == "dylan" || firstName == "Dylan")
-                {
-                    <p>Well well well. If it isn't Dylbo Baggins...</p>
-                }
-                else
-                {
-                    <p>First name: @firstName</p>
-                }
-            </li>
-            <li class="list-group-item">
-                <p>Last name: @ViewBag.LastName</p>
-            </li>
-            <li class="list-group-item">
-                Email: @ViewBag.Email
-            </li>
-        </ul>
-    </div>
-
-
-</div>
-
-<div row>
-
-    <div class="col-md-12">
-        @foreach(var routine in Model)
-        {
-            <ul>
-                @if(routine.WorkoutRoutineId == currentRoutine)
-                {
-                    <li><a asp-controller="Workout" asp-route-id="@routine.WorkoutRoutineId" asp-action="ViewRoutine">@routine.RoutineName</a> - Your current routine</li>
-                }
-                else
-                {
-                    <li><a asp-controller="Workout" asp-route-id="@routine.WorkoutRoutineId" asp-action="ViewRoutine">@routine.RoutineName</a></li>
-                }
+<div class="row">
+    <div class="col-md-4">
+        <!-- User Information Card -->
+        <div class="card shadow-sm" style="background-color: var(--bs-secondary-bg);">
+            <div class="card-header text-white" style="background-color: var(--bs-primary-bg-subtle);">
+                Profile Information
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item" style="background-color: var(--bs-secondary-bg); color: var(--bs-body-color);">
+                    <strong>First name:</strong> @ViewBag.FirstName
+                </li>
+                <li class="list-group-item" style="background-color: var(--bs-secondary-bg); color: var(--bs-body-color);">
+                    <strong>Last name:</strong> @ViewBag.LastName
+                </li>
+                <li class="list-group-item" style="background-color: var(--bs-secondary-bg); color: var(--bs-body-color);">
+                    <strong>Email:</strong> @ViewBag.Email
+                </li>
             </ul>
-        }
+        </div>
     </div>
 
+    <div class="col-md-8">
+        <!-- Workout Routines Table -->
+        <div class="card shadow-sm" style="background-color: var(--bs-secondary-bg);">
+            <div class="card-header text-white" style="background-color: var(--bs-primary-bg-subtle);">
+                Workout Routines
+            </div>
+            <table class="table table-hover" style="color: var(--bs-body-color);">
+                <thead>
+                    <tr style="background-color: var(--bs-secondary-bg);">
+                        <th>Routine Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var routine in Model)
+                    {
+                        <tr>
+                            <td>
+                                @if (routine.WorkoutRoutineId == currentRoutine)
+                                {
+                                    <span class="text-warning">@routine.RoutineName - Your current routine</span>
+                                }
+                                else
+                                {
+                                    <span>@routine.RoutineName</span>
+                                }
+                            </td>
+                            <td>
+                                <a asp-controller="Workout" asp-route-id="@routine.WorkoutRoutineId" asp-action="ViewRoutine" class="btn" style="background-color: var(--bs-link-color); color: var(--bs-body-bg);">View Routine</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
+

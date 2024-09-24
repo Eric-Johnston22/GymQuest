@@ -4,88 +4,91 @@
     ViewData["Title"] = "View and Edit Routine";
 }
 
-<div class="container">
-    <div class="row">
-        <div class="col">
-            <h2>@Model.RoutineName</h2>
+<div class="container mt-4" data-theme-midnight-blue>
+    <!-- Routine Title -->
+    <div class="row mb-3">
+        <div class="col text-center">
+            <h2 class="display-6" style="color: var(--bs-emphasis-color);">@Model.RoutineName</h2>
         </div>
     </div>
 
-
+    <!-- Workout Days and Exercises -->
     @foreach (var day in Model.WorkoutDays)
     {
-        <div class="card mt-3">
-            <div class="card-header">
-                <h4>@day.DayName</h4>
+        <div class="card mb-4" style="background-color: var(--bs-secondary-bg-subtle);">
+            <div class="card-header" style="background-color: var(--bs-primary-bg-subtle); color: var(--bs-emphasis-color);">
+                <h4 class="mb-0">@day.DayName</h4>
             </div>
-            <div class="card-body">
+            <div class="card-body text-light">
                 @if (!day.Exercises.Any())
                 {
                     <p>No exercises are planned for this day.</p>
                 }
                 else
                 {
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Exercise</th>
-                                <th>Sets</th>
-                                <th>Reps</th>
-                                <th>Weight (lbs)</th>
-                                <th>Edit</th>
-                                <th>Remove</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var exercise in day.Exercises)
-                            {
-                                <tr id="exerciseRow-@exercise.PlannedExerciseId">
-                                    <td>
-                                        <input type="text" id="exerciseName-@exercise.PlannedExerciseId" value="@exercise.ExerciseName" disabled class="form-control" />
-                                    </td>
-                                    <td>
-                                        <input type="number" id="sets-@exercise.PlannedExerciseId" value="@exercise.Sets" disabled class="form-control" />
-                                    </td>
-                                    <td>
-                                        <input type="number" id="reps-@exercise.PlannedExerciseId" value="@exercise.Reps" disabled class="form-control" />
-                                    </td>
-                                    <td>
-                                        <input type="number" id="weight-@exercise.PlannedExerciseId" value="@exercise.Weight" disabled class="form-control" />
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-warning" onclick="unlockExercise(@exercise.PlannedExerciseId)" id="unlockBtn-@exercise.PlannedExerciseId">Unlock</button>
-                                        <button class="btn btn-success d-none" id="saveBtn-@exercise.PlannedExerciseId" onclick="saveExercise(@exercise.PlannedExerciseId)">Save</button>
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-danger" onclick="removeExercise(@exercise.PlannedExerciseId)">Remove</button>
-                                    </td>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered" style="border-color: var(--bs-border-color);">
+                            <thead style="background-color: var(--bs-primary-bg-subtle); color: var(--bs-body-color);">
+                                <tr>
+                                    <th>Exercise</th>
+                                    <th>Sets</th>
+                                    <th>Reps</th>
+                                    <th>Weight (lbs)</th>
+                                    <th>Edit</th>
+                                    <th>Remove</th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
-                    //Button to open modal to add a new exercise
-                    <button class="btn btn-secondary" onclick="openAddExerciseModal('@day.DayName', '@Model.WorkoutRoutineId')">Add Exercise</button>
+                            </thead>
+                            <tbody>
+                                @foreach (var exercise in day.Exercises)
+                                {
+                                    <tr id="exerciseRow-@exercise.PlannedExerciseId">
+                                        <td>
+                                            <input type="text" id="exerciseName-@exercise.PlannedExerciseId" value="@exercise.ExerciseName" disabled class="form-control" />
+                                        </td>
+                                        <td>
+                                            <input type="number" id="sets-@exercise.PlannedExerciseId" value="@exercise.Sets" disabled class="form-control" />
+                                        </td>
+                                        <td>
+                                            <input type="number" id="reps-@exercise.PlannedExerciseId" value="@exercise.Reps" disabled class="form-control" />
+                                        </td>
+                                        <td>
+                                            <input type="number" id="weight-@exercise.PlannedExerciseId" value="@exercise.Weight" disabled class="form-control" />
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-warning" onclick="unlockExercise(@exercise.PlannedExerciseId)" id="unlockBtn-@exercise.PlannedExerciseId">Unlock</button>
+                                            <button class="btn btn-success d-none" id="saveBtn-@exercise.PlannedExerciseId" onclick="saveExercise(@exercise.PlannedExerciseId)">Save</button>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-danger" onclick="removeExercise(@exercise.PlannedExerciseId)">Remove</button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Add Exercise Button -->
+                    <button class="btn btn-secondary mt-3" style="background-color: var(--bs-secondary-bg); color: var(--bs-body-color);" onclick="openAddExerciseModal('@day.DayName', '@Model.WorkoutRoutineId')">Add Exercise</button>
                 }
             </div>
         </div>
     }
-    <br/>
-    <div class="row">
-        <div class="col-xs-1 justify-content-center">
+
+    <!-- Start Routine Button -->
+    <div class="row justify-content-center mt-4">
+        <div class="col-md-4 text-center">
             <form asp-action="StartRoutine" asp-controller="ExerciseTracking" method="post">
                 <input type="hidden" name="routineId" value="@Model.WorkoutRoutineId" />
-                <button type="submit" class="btn btn-primary">Start Routine</button>
+                <button type="submit" class="btn btn-primary btn-lg w-100" style="background-color: var(--bs-link-color); border-color: var(--bs-primary-border-subtle);">Start Routine</button>
             </form>
         </div>
     </div>
 </div>
 
-
 <!-- Modal for adding a new exercise -->
 <div class="modal fade" id="addExerciseModal" tabindex="-1" role="dialog" aria-labelledby="addExerciseModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
+        <div class="modal-content" style="background-color: var(--bs-tertiary-bg); color: var(--bs-body-color);">
+            <div class="modal-header" style="background-color: var(--bs-primary-bg-subtle); color: var(--bs-emphasis-color);">
                 <h5 class="modal-title" id="addExerciseModalLabel">Add New Exercise</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -94,8 +97,8 @@
                     <input type="hidden" id="dayName" name="dayName" />
                     <input type="hidden" id="workoutRoutineId" name="workoutRoutineId" />
 
-                    <div class="form-group">
-                        <label for="exerciseId">Exercise:</label>
+                    <div class="form-group mb-3">
+                        <label for="exerciseId" class="form-label">Exercise:</label>
                         <select id="exerciseId" name="exerciseId" class="form-control">
                             <option value="">-- Select Exercise --</option>
                             @foreach (var exercise in ViewBag.Exercises)
@@ -103,35 +106,63 @@
                                 <option value="@exercise.ExerciseId">@exercise.Name</option>
                             }
                         </select>
-                        <button type="button" class="btn btn-link" onclick="openCreateExerciseModal()">+ Create New Exercise</button>
+                        <button type="button" class="btn btn-link" style="color: var(--bs-link-color);" onclick="openCreateExerciseModal()">+ Create New Exercise</button>
                     </div>
 
-                    <div class="form-group">
-                        <label for="sets">Sets:</label>
+                    <div class="form-group mb-3">
+                        <label for="sets" class="form-label">Sets:</label>
                         <input type="number" id="sets" name="sets" class="form-control" required />
                     </div>
 
-                    <div class="form-group">
-                        <label for="reps">Reps:</label>
+                    <div class="form-group mb-3">
+                        <label for="reps" class="form-label">Reps:</label>
                         <input type="number" id="reps" name="reps" class="form-control" required />
                     </div>
 
-                    <div class="form-group">
-                        <label for="weight">Weight (lbs):</label>
+                    <div class="form-group mb-3">
+                        <label for="weight" class="form-label">Weight (lbs):</label>
                         <input type="number" id="weight" name="weight" class="form-control" required />
                     </div>
 
-                    <div class="form-group">
-                        <label for="notes">Notes (optional):</label>
+                    <div class="form-group mb-3">
+                        <label for="notes" class="form-label">Notes (optional):</label>
                         <textarea id="notes" name="notes" class="form-control"></textarea>
                     </div>
 
-                    <button type="button" class="btn btn-primary" onclick="addExercise()">Save Exercise</button>
+                    <button type="button" class="btn" style="background-color: var(--bs-link-color); color: var(--bs-body-bg);" onclick="addExercise()">Save Exercise</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Modal for creating a new exercise -->
+<div class="modal fade" id="createExerciseModal" tabindex="-1" role="dialog" aria-labelledby="createExerciseModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createExerciseModalLabel">Create New Exercise</h5>
+                <button type="button" class="btn-close" id="newExerciseClose" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createExerciseForm">
+                    <div class="form-group">
+                        <label for="exerciseName">Exercise Name</label>
+                        <input type="text" class="form-control" id="exerciseName" name="exerciseName" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="exerciseDescription">Description (optional)</label>
+                        <textarea class="form-control" id="exerciseDescription" name="exerciseDescription"></textarea>
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="submitNewExercise()">Save Exercise</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 @section Scripts {
     <script type="text/javascript">
@@ -187,6 +218,17 @@
             $('#addExerciseModal').modal('show');
         }
 
+        // Function to open the modal for creating a new exercise
+        function openCreateExerciseModal() {
+            $('#createExerciseModal').modal('show');
+            $('#addExerciseModal').modal('hide'); // Hide the 'AddExercise' modal to avoid clutter
+        }
+
+        // If the `Close` button in the 'Create New Exercise' modal is clicked, show the 'Add Exercise' Modal
+        $("#newExerciseClose").click(function () {
+            $('#addExerciseModal').modal('show');
+        })
+
         function addExercise() {
             var dayName = $('#dayName').val();
             var workoutRoutineId = $('#workoutRoutineId').val();
@@ -195,6 +237,16 @@
             var reps = $('#reps').val();
             var weight = $('#weight').val();
             var notes = $('#notes').val();
+
+            console.log({
+                dayName: dayName,
+                workoutRoutineId: workoutRoutineId,
+                exerciseId: exerciseId,
+                sets: sets,
+                reps: reps,
+                weight: weight,
+                notes: notes
+            });
 
             $.ajax({
                 url: '/Workout/AddExerciseToDay', // Adjust the controller/action URL
@@ -219,6 +271,30 @@
             });
         }
 
+        function submitNewExercise() {
+            var exerciseName = $('#exerciseName').val();
+            var exerciseDescription = $('#exerciseDescription').val();
+
+            $.ajax({
+                url: '@Url.Action("CreateExercise", "Workout")',
+                type: 'POST',
+                data: {
+                    name: exerciseName,
+                    description: exerciseDescription
+                },
+                success: function (newExercise) {
+                    $('#createExerciseModal').modal('hide');
+                    $('#addExerciseModal').modal('show'); // Show the 'AddExercise' modal again
+                    // Add the new exercise to the dropdown list
+                    $('#exerciseId').append(new Option(newExercise.name, newExercise.exerciseId));
+                    // Automatically select the new exercise
+                    $('#exerciseId').val(newExercise.exerciseId);
+                },
+                error: function () {
+                    alert("An error occurred while creating the exercise. Please try again.");
+                }
+            });
+        }
 
         function removeExercise(exerciseId) {
             if (confirm("Are you sure you want to remove this exercise?")) {

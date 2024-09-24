@@ -21,6 +21,20 @@ namespace GymQuest.Data
             return routine.WorkoutRoutineId; // Return ID for controller redirect
         }
 
+        // New routine creation method
+        public async Task AddRoutineAsync(WorkoutRoutines routine)
+        {
+            _context.WorkoutRoutines.Add(routine);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task SaveRoutineAsync(WorkoutRoutines routine)
+        {
+            _context.WorkoutRoutines.Add(routine); // Add the new routine
+            await _context.SaveChangesAsync(); // Save to the database
+        }
+
+
         public async Task<WorkoutRoutines?> GetWorkoutRoutineByIdAsync(int? id)
         {
             return await _context.WorkoutRoutines

@@ -23,39 +23,77 @@ namespace GymQuest.Controllers
 
         // Step 1: Create routine (basic info)
         [HttpGet]
-        public IActionResult CreateRoutine()
+        public async Task<IActionResult> CreateRoutineAsync()
         {
-            return View(new CreateRoutineViewModel());
-        }
-        
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateRoutine(CreateRoutineViewModel model)
-        {
-            int workoutRoutineId;
-            if (ModelState.IsValid)
+            // Initialize an empty CreateRoutineViewModel without default values
+            var model = new ViewRoutineViewModel
             {
-                try
-                {
-                    workoutRoutineId = await _workoutService.CreateRoutineAsync(model, User);
-                    // Redirect to the next step, passing the WorkoutRoutineId
-                    return RedirectToAction("AddWorkoutDays", new { id = workoutRoutineId });
-                }
-                catch (Exception err)
-                {
-                    ModelState.AddModelError(string.Empty, "An error occurred while saving the routine. Please try again.");
-                }
-            }
+                RoutineName = string.Empty,
+                CycleDays = 0,
+                IsCycle = false,
+                WorkoutDays = new List<ViewRoutineDayViewModel>() // Empty list of workout days
+            };
+
+            var exercises = await _workoutService.GetExercisesAsync();
+            ViewBag.Exercises = exercises;
 
             return View(model);
         }
+
+
+
+
+        [HttpPost]
+        public async Task<IActionResult> CreateRoutine([FromBody] ViewRoutineViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                // Fetch currently logged-in user
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized(); // Ensure a user is logged in
+                }
+
+                // Map ViewModel to the actual WorkoutRoutine entity
+                var newRoutine = new WorkoutRoutines
+                {
+                    RoutineName = model.RoutineName,
+                    CycleDays = model.CycleDays,
+                    IsCycle = model.IsCycle,
+                    CreatedAt = DateTime.Now,
+                    Status = "Completed",
+                    UserId = userId,
+                    WorkoutDays = model.WorkoutDays.Select(day => new WorkoutDays
+                    {
+                        DayId = day.DayId, // Map accordingly
+                        WorkoutType = day.WorkoutType,
+                        PlannedExercises = day.Exercises.Select(ex => new PlannedExercises
+                        {
+                            WorkoutDayId = ex.WorkoutDayId,
+                            ExerciseId = ex.ExerciseId,
+                            Sets = ex.Sets,
+                            Reps = ex.Reps,
+                            Weight = ex.Weight,
+                            Notes = ex.Notes
+                        }).ToList()
+                    }).ToList()
+                };
+
+                await _workoutService.CreateRoutineAsync(newRoutine, userId);
+                return Ok(new { workoutRoutineId = newRoutine.WorkoutRoutineId }); // Return JSON response
+            }
+
+            return BadRequest(ModelState);
+        }
+
 
         // Step 2: Add Workout Days
         [HttpGet]
         public async Task<IActionResult> AddWorkoutDays(int id)
         {
             var workoutRoutine = await _workoutService.GetWorkoutRoutineByIdAsync(id);
-            if (workoutRoutine == null || workoutRoutine.Status != "Draft")
+            if (workoutRoutine == null || workoutRoutine.Status != "Completed")
             {
                 return NotFound();
             }
@@ -208,7 +246,16 @@ namespace GymQuest.Controllers
 
             await _workoutService.AddPlannedExerciseAsync(plannedExercise);
 
-            return Ok();
+            // Return the exercise details
+            var exercise = await _workoutService.GetPlannedExerciseByIdAsync(exerciseId);
+            return Ok(new
+            {
+                exerciseId = exercise.ExerciseId,
+                sets = sets,
+                reps = reps,
+                weight = weight,
+                notes = notes
+            });
         }
 
 

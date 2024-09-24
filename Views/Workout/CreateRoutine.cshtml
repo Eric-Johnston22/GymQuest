@@ -1,29 +1,301 @@
-﻿@model GymQuest.Models.ViewModels.CreateRoutineViewModel
+﻿@model GymQuest.Models.ViewModels.ViewRoutineViewModel
 
-@{
-    ViewData["Title"] = "Create Workout Routine";
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h2 class="text-center">Create New Routine</h2>
+
+            <!-- Routine Creation Form -->
+            <form id="routineForm" class="mt-4">
+                <div class="form-group mb-3">
+                    <label for="RoutineName" class="form-label">Routine Name:</label>
+                    <input type="text" asp-for="RoutineName" class="form-control" required placeholder="Enter routine name" />
+                </div>
+
+                <!-- Day Selector with Add Button -->
+                <div class="row g-3 align-items-center mb-3">
+                    <div class="col-auto">
+                        <label for="daySelector" class="col-form-label">Select Day:</label>
+                    </div>
+                    <div class="col-auto">
+                        <select id="daySelector" class="form-control">
+                            <option value="">-- Select Day --</option>
+                            <option value="1">Monday</option>
+                            <option value="2">Tuesday</option>
+                            <option value="3">Wednesday</option>
+                            <option value="4">Thursday</option>
+                            <option value="5">Friday</option>
+                            <option value="6">Saturday</option>
+                            <option value="7">Sunday</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-primary" id="addDayBtn" onclick="addDay()">Add Day</button>
+                    </div>
+                </div>
+
+                <!-- Dynamic Days Section -->
+                <div id="days-container"></div>
+
+                <!-- Submit Button -->
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-success">Confirm and Save Routine</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for adding a new exercise -->
+<div class="modal fade" id="addExerciseModal" tabindex="-1" role="dialog" aria-labelledby="addExerciseModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addExerciseModalLabel">Add New Exercise</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addExerciseForm">
+                    <input type="hidden" id="dayId" name="dayId" />
+                    <div class="form-group">
+                        <label for="exerciseId">Exercise:</label>
+                        <select id="exerciseId" name="exerciseId" class="form-control">
+                            <option value="">-- Select Exercise --</option>
+                            @foreach (var exercise in ViewBag.Exercises)
+                            {
+                                <option value="@exercise.ExerciseId">@exercise.Name</option>
+                            }
+                        </select>
+                        <button type="button" class="btn btn-link" style="color: var(--bs-link-color);" onclick="openCreateExerciseModal()">+ Create New Exercise</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sets">Sets:</label>
+                        <input type="number" id="sets" name="sets" class="form-control" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reps">Reps:</label>
+                        <input type="number" id="reps" name="reps" class="form-control" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="weight">Weight (lbs):</label>
+                        <input type="number" id="weight" name="weight" class="form-control" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">Notes (optional):</label>
+                        <textarea id="notes" name="notes" class="form-control"></textarea>
+                    </div>
+
+                    <button type="button" class="btn btn-primary" onclick="saveExercise()">Save Exercise</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for creating a new exercise -->
+<div class="modal fade" id="createExerciseModal" tabindex="-1" role="dialog" aria-labelledby="createExerciseModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createExerciseModalLabel">Create New Exercise</h5>
+                <button type="button" class="btn-close" id="newExerciseClose" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createExerciseForm">
+                    <div class="form-group">
+                        <label for="exerciseName">Exercise Name</label>
+                        <input type="text" class="form-control" id="exerciseName" name="exerciseName" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="exerciseDescription">Description (optional)</label>
+                        <textarea class="form-control" id="exerciseDescription" name="exerciseDescription"></textarea>
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="submitNewExercise()">Save Exercise</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        var routineData = {
+            RoutineName: '',
+            WorkoutDays: []
+        };
+
+        function addDay() {
+            var selectedDay = $('#daySelector').val();
+            var selectedDayText = $('#daySelector option:selected').text();
+
+            if (!selectedDay) {
+                alert('Please select a day before adding.');
+                return;
+            }
+
+            // Check if the day is already added (if needed)
+            if ($("#day-" + selectedDay).length) {
+                alert(selectedDayText + " has already been added.");
+                return;
+            }
+
+            // Add new day section, with a text input for Workout Type
+            var newDay = `
+                        <div class="card mt-4">
+                            <div class="card-header bg-secondary text-white">
+                                <h5>${selectedDayText}</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group mb-3">
+                                    <label for="workoutType-${selectedDay}">Workout Type:</label>
+                                    <input type="text" id="workoutType-${selectedDay}" class="form-control" placeholder="Enter Workout Type" />
+                                </div>
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Exercise</th>
+                                            <th>Sets</th>
+                                            <th>Reps</th>
+                                            <th>Weight</th>
+                                            <th>Notes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="day-${selectedDay}">
+                                    </tbody>
+                                </table>
+                                <button type="button" class="btn btn-secondary" onclick="openAddExerciseModal(${selectedDay})">Add Exercise</button>
+                            </div>
+                        </div>
+                    `;
+
+            $("#days-container").append(newDay);
+
+
+            // Add the day to the routineData structure with the correct DayId
+            routineData.WorkoutDays.push({
+                DayId: selectedDay,
+                DayName: selectedDayText,
+                WorkoutType: '', // Will be set later by setWorkoutType
+                Exercises: []
+            });
+
+            console.log("Day added: ", routineData.WorkoutDays);  // Debugging log
+        }
+
+        // Function to open the modal for adding an exercise
+        function openAddExerciseModal(dayId) {
+            $('#dayId').val(dayId); // Pass the correct day ID
+            $('#addExerciseModal').modal('show');
+        }
+
+        // Function to open the modal for creating a new exercise
+        function openCreateExerciseModal() {
+            $('#createExerciseModal').modal('show');
+            $('#addExerciseModal').modal('hide'); // Hide the 'AddExercise' modal to avoid clutter
+        }
+
+        // If the `Close` button in the 'Create New Exercise' modal is clicked, show the 'Add Exercise' Modal
+        $("#newExerciseClose").click(function() {
+            $('#addExerciseModal').modal('show');
+        })
+
+        // Function to save the exercise via the modal
+        function saveExercise() {
+            var dayId = $('#dayId').val();
+            var exerciseId = $('#exerciseId').val();
+            var exerciseName = $('#exerciseId option:selected').text();
+            var sets = $('#sets').val();
+            var reps = $('#reps').val();
+            var weight = $('#weight').val();
+            var notes = $('#notes').val();
+
+            console.log(exerciseId);
+            // Find the correct day and add the exercise
+            var day = routineData.WorkoutDays.find(d => d.DayId == dayId);
+            if (day) {
+                day.Exercises.push({
+                    ExerciseId: exerciseId,
+                    ExerciseName: exerciseName,
+                    Sets: sets,
+                    Reps: reps,
+                    Weight: weight,
+                    Notes: notes
+                });
+            }
+
+            // Append the exercise to the table
+            var newExercise = `
+                <tr>
+                    <td>${exerciseName}</td>
+                    <td>${sets}</td>
+                    <td>${reps}</td>
+                    <td>${weight}</td>
+                    <td>${notes}</td>
+                </tr>
+            `;
+            $("#day-" + dayId).append(newExercise);
+            $('#addExerciseModal').modal('hide');
+
+            console.log("Exercise added to DayId: ", dayId, day.Exercises);  // Debugging log
+        }
+
+        function submitNewExercise() {
+            var exerciseName = $('#exerciseName').val();
+            var exerciseDescription = $('#exerciseDescription').val();
+
+            $.ajax({
+                url: '@Url.Action("CreateExercise", "Workout")',
+                type: 'POST',
+                data: {
+                    name: exerciseName,
+                    description: exerciseDescription
+                },
+                success: function (newExercise) {
+                    $('#createExerciseModal').modal('hide');
+                    $('#addExerciseModal').modal('show'); // Show the 'AddExercise' modal again
+                    // Add the new exercise to the dropdown list
+                    $('#exerciseId').append(new Option(newExercise.name, newExercise.exerciseId));
+                    // Automatically select the new exercise
+                    $('#exerciseId').val(newExercise.exerciseId);
+                },
+                error: function () {
+                    alert("An error occurred while creating the exercise. Please try again.");
+                }
+            });
+        }
+
+        // AJAX form submission
+        $('#routineForm').on('submit', function (e) {
+            e.preventDefault();
+
+            // Collect the workout type before submission
+            routineData.WorkoutDays.forEach(day => {
+                day.WorkoutType = $(`#workoutType-${day.DayId}`).val(); // Capture the entered workout type
+            });
+
+            routineData.RoutineName = $('input[name="RoutineName"]').val(); // Routine Name
+
+            console.log("Final routineData before submit: ", routineData);  // Debugging log
+
+            $.ajax({
+                url: '@Url.Action("CreateRoutine", "Workout")',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(routineData),
+                success: function (response) {
+                    window.location.href = "/Workout/ViewRoutine?id=" + response.workoutRoutineId; // Redirect to view the routine
+                },
+                error: function (xhr, status, error) {
+                    alert("An error occurred: " + error);
+                }
+            });
+        });
+
+    </script>
 }
-
-<h2>Create a New Workout Routine</h2>
-
-<form asp-action="CreateRoutine" method="post">
-    <div class="form-group">
-        <label asp-for="RoutineName"></label>
-        <input asp-for="RoutineName" class="form-control" />
-        <span asp-validation-for="RoutineName" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="CycleDays">Number of Cycle Days (optional)</label>
-        <input asp-for="CycleDays" class="form-control" />
-        <span asp-validation-for="CycleDays" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="IsCycle">Is this a cyclical routine?</label>
-        <input asp-for="IsCycle" type="checkbox" />
-        <span asp-validation-for="IsCycle" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Next</button>
-</form>

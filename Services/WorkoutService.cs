@@ -20,29 +20,41 @@ namespace GymQuest.Services
             _userManager = userManager;
         }
 
-        public async Task<int> CreateRoutineAsync(CreateRoutineViewModel model, ClaimsPrincipal user)
+        //public async Task<int> CreateRoutineAsync(CreateRoutineViewModel model, ClaimsPrincipal user)
+        //{
+
+        //    try
+        //    {
+        //        var userId = _userManager.GetUserId(user);
+        //        var workoutRoutine = new WorkoutRoutines
+        //        {
+        //            RoutineName = model.RoutineName,
+        //            CycleDays = model.CycleDays,
+        //            IsCycle = model.IsCycle,
+        //            UserId = userId,
+        //            CreatedAt = DateTime.Now,
+        //            Status = "Draft" // Set as draft
+        //        };
+
+        //        return await _workoutRepository.CreateWorkoutRoutineAsync(workoutRoutine);
+        //    }
+        //    catch (DbUpdateException ex)
+        //    {
+        //        throw new Exception("There was an error saving the workout routine", ex);
+        //    }
+        //}
+
+        // New Updated method (overload)
+        public async Task CreateRoutineAsync(WorkoutRoutines routine, string userId)
         {
+            // Set the userId in the entity
+            routine.UserId = userId;
 
-            try
-            {
-                var userId = _userManager.GetUserId(user);
-                var workoutRoutine = new WorkoutRoutines
-                {
-                    RoutineName = model.RoutineName,
-                    CycleDays = model.CycleDays,
-                    IsCycle = model.IsCycle,
-                    UserId = userId,
-                    CreatedAt = DateTime.Now,
-                    Status = "Draft" // Set as draft
-                };
-
-                return await _workoutRepository.CreateWorkoutRoutineAsync(workoutRoutine);
-            }
-            catch (DbUpdateException ex)
-            {
-                throw new Exception("There was an error saving the workout routine", ex);
-            }
+            // Call the repository to save the routine
+            await _workoutRepository.SaveRoutineAsync(routine);
         }
+
+
 
         public async Task AddWorkoutDaysAsync(AddWorkoutDaysViewModel model)
         {

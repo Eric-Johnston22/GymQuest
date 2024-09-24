@@ -239,6 +239,25 @@ namespace GymQuest.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> AddExerciseToDay(int dayId, int exerciseId, int sets, int reps, decimal weight, string notes)
+        {
+            // Logic to save the exercise
+            var newExercise = new PlannedExercises
+            {
+                WorkoutDayId = dayId,
+                ExerciseId = exerciseId,
+                Sets = sets,
+                Reps = reps,
+                Weight = weight,
+                Notes = notes
+            };
+
+            await _exerciseTrackingService.AddPlannedExerciseAsync(newExercise);
+
+            return Ok();
+        }
+
+        [HttpPost]
         public async Task<IActionResult> CreateExercise(string name, string? description)
         {
             var exercise = new Exercises

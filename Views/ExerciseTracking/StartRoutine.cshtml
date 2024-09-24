@@ -5,16 +5,16 @@
     var exercises = ViewBag.Exercises as List<GymQuest.Models.Exercises>; // Ensure correct type
 }
 
-<h2>@Model.RoutineName - @Model.DayName</h2>
+<h2 class="text-emphasis-primary">@Model.RoutineName - @Model.DayName</h2>
 
 @if (!Model.PlannedExercises.Any())
 {
     <p>No exercises are planned for today.</p>
-    <button type="button" class="btn btn-secondary" onclick="openAddExerciseModal('@Model.DayName')">Add Exercise</button>
+    <button type="button" class="btn btn-secondary" style="background-color: var(--bs-secondary-bg); color: var(--bs-body-color);" onclick="openAddExerciseModal('@Model.DayName')">Add Exercise</button>
 }
 
-<table class="table table-bordered">
-    <thead>
+<table class="table table-bordered" style="color: var(--bs-body-color); border-color: var(--bs-border-color);">
+    <thead style="background-color: var(--bs-primary-bg-subtle); color: var(--bs-body-color);">
         <tr>
             <th>Exercise</th>
             <th>Set</th>
@@ -37,15 +37,14 @@
                             @exercise.ExerciseName
                         </td>
                     }
-                    
                     <td>@set</td>
                     <td>@exercise.GoalReps</td>
                     <td>@exercise.Weight</td>
                     <td>
-                        <input type="number" asp-for="@exercise.RepsCompleted" id="actualReps[@exercise.PlannedExercisesId][@set]" min="0" max="@exercise.GoalReps" class="form-control"/>
+                        <input type="number" asp-for="@exercise.RepsCompleted" id="actualReps[@exercise.PlannedExercisesId][@set]" min="0" max="@exercise.GoalReps" class="form-control" style="background-color: var(--bs-secondary-bg); color: var(--bs-body-color);" />
                     </td>
                     <td>
-                        <input type="text" class="form-control" id="notes[@exercise.PlannedExercisesId][@set]" placeholder="Add notes (optional)" />
+                        <input type="text" class="form-control" id="notes[@exercise.PlannedExercisesId][@set]" placeholder="Add notes (optional)" style="background-color: var(--bs-secondary-bg); color: var(--bs-body-color);" />
                     </td>
                     <td>
                         <button type="button" class="btn btn-success" onclick="saveSet(@exercise.PlannedExercisesId, @set, @exercise.GoalReps, @exercise.Weight, @exercise.Sets)">Save Set</button>
@@ -56,59 +55,61 @@
     </tbody>
 </table>
 
+<!-- Add Exercise Button -->
+<button class="btn btn-secondary mt-3" style="background-color: var(--bs-secondary-bg); color: var(--bs-body-color);" onclick="openAddExerciseModal()">Add Exercise</button>
+
 <!-- Form to end the workout -->
 <form asp-action="EndWorkout" method="post">
     <input type="hidden" name="routineId" value="@Model.WorkoutRoutineId" />
-    <button type="submit" class="btn btn-primary">End Workout</button>
+    <button type="submit" class="btn btn-primary" style="background-color: var(--bs-link-color); color: var(--bs-body-bg); border-color: var(--bs-primary-border-subtle);">End Workout</button>
 </form>
-
 
 <!-- Modal for adding a new exercise -->
 <div class="modal fade" id="addExerciseModal" tabindex="-1" role="dialog" aria-labelledby="addExerciseModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
+        <div class="modal-content" style="background-color: var(--bs-tertiary-bg); color: var(--bs-body-color);">
+            <div class="modal-header" style="background-color: var(--bs-primary-bg-subtle); color: var(--bs-emphasis-color);">
                 <h5 class="modal-title" id="addExerciseModalLabel">Add New Exercise</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="addExerciseForm">
-                    <input type="hidden" id="workoutDayName" name="dayName" value="@Model.DayName" />
+                    <input type="hidden" id="dayName" name="dayName" value="@Model.DayName" />
                     <input type="hidden" id="workoutRoutineId" name="workoutRoutineId" value="@Model.WorkoutRoutineId" />
 
                     <div class="form-group">
-                        <label for="exerciseId">Exercise:</label>
-                        <select id="exerciseId" name="exerciseId" class="form-control">
+                        <label for="exerciseId" class="form-label">Exercise:</label>
+                        <select id="exerciseId" name="exerciseId" class="form-control" style="background-color: var(--bs-secondary-bg); color: var(--bs-body-color);">
                             <option value="">-- Select Exercise --</option>
                             @foreach (var exercise in exercises)
                             {
                                 <option value="@exercise.ExerciseId">@exercise.Name</option>
                             }
                         </select>
-                        <button type="button" class="btn btn-link" onclick="openCreateExerciseModal()">+ Create New Exercise</button>
+                        <button type="button" class="btn btn-link" style="color: var(--bs-link-color);" onclick="openCreateExerciseModal()">+ Create New Exercise</button>
                     </div>
 
                     <div class="form-group">
-                        <label for="sets">Sets:</label>
-                        <input type="number" id="sets" name="sets" class="form-control" required />
+                        <label for="sets" class="form-label">Sets:</label>
+                        <input type="number" id="sets" name="sets" class="form-control" style="background-color: var(--bs-secondary-bg); color: var(--bs-body-color);" required />
                     </div>
 
                     <div class="form-group">
-                        <label for="reps">Reps:</label>
-                        <input type="number" id="reps" name="reps" class="form-control" required />
+                        <label for="reps" class="form-label">Reps:</label>
+                        <input type="number" id="reps" name="reps" class="form-control" style="background-color: var(--bs-secondary-bg); color: var(--bs-body-color);" required />
                     </div>
 
                     <div class="form-group">
-                        <label for="weight">Weight (lbs):</label>
-                        <input type="number" id="weight" name="weight" class="form-control" required />
+                        <label for="weight" class="form-label">Weight (lbs):</label>
+                        <input type="number" id="weight" name="weight" class="form-control" style="background-color: var(--bs-secondary-bg); color: var(--bs-body-color);" required />
                     </div>
 
                     <div class="form-group">
-                        <label for="notes">Notes (optional):</label>
-                        <textarea id="notes" name="notes" class="form-control"></textarea>
+                        <label for="notes" class="form-label">Notes (optional):</label>
+                        <textarea id="notes" name="notes" class="form-control" style="background-color: var(--bs-secondary-bg); color: var(--bs-body-color);"></textarea>
                     </div>
 
-                    <button type="button" class="btn btn-primary" onclick="saveExercise()">Save Exercise</button>
+                    <button type="button" class="btn" style="background-color: var(--bs-link-color); color: var(--bs-body-bg);" onclick="saveExercise()">Save Exercise</button>
                 </form>
             </div>
         </div>
@@ -121,7 +122,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="createExerciseModalLabel">Create New Exercise</h5>
-                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                <button type="button" class="btn-close" id="newExerciseClose" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -142,17 +143,26 @@
     </div>
 </div>
 
+
 @section Scripts {
     <script type="text/javascript">
+
         function openAddExerciseModal(dayName) {
             console.log(dayName);
             $('#workoutDayName').val(dayName);
             $('#addExerciseModal').modal('show');
         }
 
+        // Function to open the modal for creating a new exercise
         function openCreateExerciseModal() {
             $('#createExerciseModal').modal('show');
+            $('#addExerciseModal').modal('hide'); // Hide the 'AddExercise' modal to avoid clutter
         }
+
+        // If the `Close` button in the 'Create New Exercise' modal is clicked, show the 'Add Exercise' Modal
+        $("#newExerciseClose").click(function () {
+            $('#addExerciseModal').modal('show');
+        })
 
        function saveSet(plannedExerciseId, setNumber, goalReps, weight, goalSets) {
             var repsCompleted = $('#actualReps\\[' + plannedExerciseId + '\\]\\[' + setNumber + '\\]').val(); // Retrieve completed reps
@@ -214,5 +224,95 @@
                 }
             });
         }
+
+        // Function to save the exercise via the modal
+        function saveExercise() {
+            var dayName = $('#dayName').val();
+            var workoutRoutineId = $('#workoutRoutineId').val();
+            var exerciseId = $('#exerciseId').val();
+            var exerciseName = $('#exerciseId option:selected').text();
+            var sets = $('#sets').val();
+            var reps = $('#reps').val();
+            var weight = $('#weight').val();
+            var notes = $('#notes').val();
+
+            console.log({
+                dayName: dayName,
+                workoutRoutineId: workoutRoutineId,
+                exerciseId: exerciseId,
+                sets: sets,
+                reps: reps,
+                weight: weight,
+                notes: notes
+            });
+
+            $.ajax({
+                url: '/Workout/AddExerciseToDay', // Adjust the controller/action URL
+                type: 'POST',
+                data: {
+                    workoutRoutineId: workoutRoutineId,
+                    dayName: dayName,
+                    exerciseId: exerciseId,
+                    sets: sets,
+                    reps: reps,
+                    weight: weight,
+                    notes: notes
+                },
+                success: function (response) {
+                    var plannedExercisesId = response.plannedExercisesId; // Use this ID for dynamic elements
+
+                    // Build the new exercise rows
+                    var newExerciseRows = "";
+                    for (var set = 1; set <= sets; set++) {
+                        if (set === 1) {
+                            newExerciseRows += `
+                            <tr class="exercise-separator">
+                                <td rowspan="${sets}" style="max-width: 100px; word-wrap: break-word; overflow-wrap: break-word;">
+                                    ${exerciseName}
+                                </td>
+                                <td>${set}</td>
+                                <td>${reps}</td>
+                                <td>${weight}</td>
+                                <td>
+                                    <input type="number" id="actualReps[${plannedExercisesId}][${set}]" min="0" max="${reps}" class="form-control" style="background-color: var(--bs-secondary-bg); color: var(--bs-body-color);" />
+                                </td>
+                                <td>
+                                    <input type="text" id="notes[${plannedExercisesId}][${set}]" class="form-control" placeholder="Add notes (optional)" style="background-color: var(--bs-secondary-bg); color: var(--bs-body-color);" />
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-success" onclick="saveSet(${plannedExercisesId}, ${set}, ${reps}, ${weight}, ${sets})">Save Set</button>
+                                </td>
+                            </tr>`;
+                        } else {
+                            newExerciseRows += `
+                            <tr>
+                                <td>${set}</td>
+                                <td>${reps}</td>
+                                <td>${weight}</td>
+                                <td>
+                                    <input type="number" id="actualReps[${plannedExercisesId}][${set}]" min="0" max="${reps}" class="form-control" style="background-color: var(--bs-secondary-bg); color: var(--bs-body-color);" />
+                                </td>
+                                <td>
+                                    <input type="text" id="notes[${plannedExercisesId}][${set}]" class="form-control" placeholder="Add notes (optional)" style="background-color: var(--bs-secondary-bg); color: var(--bs-body-color);" />
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-success" onclick="saveSet(${plannedExercisesId}, ${set}, ${reps}, ${weight}, ${sets})">Save Set</button>
+                                </td>
+                            </tr>`;
+                        }
+                    }
+
+                    // Append the new rows to the table body (assuming there's a single table)
+                    $("tbody").append(newExerciseRows);
+
+                    // Close the modal
+                    $('#addExerciseModal').modal('hide');
+                },
+                error: function () {
+                    alert("An error occurred while adding the exercise.");
+                }
+            });
+        }
+
     </script>
 }
