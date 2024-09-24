@@ -6,10 +6,12 @@
             <h2 class="text-center">Create New Routine</h2>
 
             <!-- Routine Creation Form -->
-            <form id="routineForm" class="mt-4">
+            @using (Html.BeginForm("CreateRoutine", "Workout", FormMethod.Post))
+            {
                 <div class="form-group mb-3">
                     <label for="RoutineName" class="form-label">Routine Name:</label>
                     <input type="text" asp-for="RoutineName" class="form-control" required placeholder="Enter routine name" />
+                    <span asp-validation-for="RoutineName" class="text-danger"></span>
                 </div>
 
                 <!-- Day Selector with Add Button -->
@@ -41,7 +43,7 @@
                 <div class="text-center mt-4">
                     <button type="submit" class="btn btn-success">Confirm and Save Routine</button>
                 </div>
-            </form>
+            }
         </div>
     </div>
 </div>
@@ -89,7 +91,7 @@
                         <textarea id="notes" name="notes" class="form-control"></textarea>
                     </div>
 
-                    <button type="button" class="btn btn-primary" onclick="saveExercise()">Save Exercise</button>
+                    <button type="button" class="btn btn-primary" onclick="saveExercise(dayIndex, dayId)">Save Exercise</button>
                 </form>
             </div>
         </div>
@@ -125,10 +127,7 @@
 
 @section Scripts {
     <script type="text/javascript">
-        var routineData = {
-            RoutineName: '',
-            WorkoutDays: []
-        };
+        var workoutDays = [];
 
         function addDay() {
             var selectedDay = $('#daySelector').val();
@@ -139,75 +138,61 @@
                 return;
             }
 
-            // Check if the day is already added (if needed)
+            // Check if the day is already added
             if ($("#day-" + selectedDay).length) {
                 alert(selectedDayText + " has already been added.");
                 return;
             }
 
-            // Add new day section, with a text input for Workout Type
+            // Add the day section with hidden inputs that follow ASP.NET MVC naming conventions
             var newDay = `
-                        <div class="card mt-4">
-                            <div class="card-header bg-secondary text-white">
-                                <h5>${selectedDayText}</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="form-group mb-3">
-                                    <label for="workoutType-${selectedDay}">Workout Type:</label>
-                                    <input type="text" id="workoutType-${selectedDay}" class="form-control" placeholder="Enter Workout Type" />
-                                </div>
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Exercise</th>
-                                            <th>Sets</th>
-                                            <th>Reps</th>
-                                            <th>Weight</th>
-                                            <th>Notes</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="day-${selectedDay}">
-                                    </tbody>
-                                </table>
-                                <button type="button" class="btn btn-secondary" onclick="openAddExerciseModal(${selectedDay})">Add Exercise</button>
-                            </div>
+                <div class="card mt-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5>${selectedDayText}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group mb-3">
+                            <label for="workoutType-${selectedDay}">Workout Type:</label>
+                            <input type="text" name="WorkoutDays[${workoutDays.length}].WorkoutType" id="workoutType-${selectedDay}" class="form-control" placeholder="Enter Workout Type" />
                         </div>
-                    `;
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Exercise</th>
+                                    <th>Sets</th>
+                                    <th>Reps</th>
+                                    <th>Weight</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="day-${selectedDay}">
+                            </tbody>
+                        </table>
+                        <input type="hidden" name="WorkoutDays[${workoutDays.length}].DayId" value="${selectedDay}" />
+                        <button type="button" class="btn btn-secondary" onclick="openAddExerciseModal(${selectedDay}, ${workoutDays.length})">Add Exercise</button>
+                    </div>
+                </div>
+            `;
 
             $("#days-container").append(newDay);
 
-
-            // Add the day to the routineData structure with the correct DayId
-            routineData.WorkoutDays.push({
+            // Add the day to the workoutDays array
+            workoutDays.push({
                 DayId: selectedDay,
                 DayName: selectedDayText,
-                WorkoutType: '', // Will be set later by setWorkoutType
                 Exercises: []
             });
-
-            console.log("Day added: ", routineData.WorkoutDays);  // Debugging log
         }
 
-        // Function to open the modal for adding an exercise
-        function openAddExerciseModal(dayId) {
-            $('#dayId').val(dayId); // Pass the correct day ID
+        function openAddExerciseModal(dayId, dayIndex) {
+            $('#dayId').val(dayId);  // Store the dayId
             $('#addExerciseModal').modal('show');
+
+            // Add the day index to the modal's Save button
+            $("#addExerciseForm").find("button[type='button']").attr("onclick", `saveExercise(${dayIndex}, ${dayId})`);
         }
 
-        // Function to open the modal for creating a new exercise
-        function openCreateExerciseModal() {
-            $('#createExerciseModal').modal('show');
-            $('#addExerciseModal').modal('hide'); // Hide the 'AddExercise' modal to avoid clutter
-        }
-
-        // If the `Close` button in the 'Create New Exercise' modal is clicked, show the 'Add Exercise' Modal
-        $("#newExerciseClose").click(function() {
-            $('#addExerciseModal').modal('show');
-        })
-
-        // Function to save the exercise via the modal
-        function saveExercise() {
-            var dayId = $('#dayId').val();
+        function saveExercise(dayIndex, dayId) {
             var exerciseId = $('#exerciseId').val();
             var exerciseName = $('#exerciseId option:selected').text();
             var sets = $('#sets').val();
@@ -215,34 +200,45 @@
             var weight = $('#weight').val();
             var notes = $('#notes').val();
 
-            console.log(exerciseId);
-            // Find the correct day and add the exercise
-            var day = routineData.WorkoutDays.find(d => d.DayId == dayId);
+            if (!exerciseId || !sets || !reps || !weight) {
+                alert("Please fill out all fields.");
+                return;
+            }
+
+            // Find the correct day in the workoutDays array and add the exercise
+            var day = workoutDays[dayIndex];
             if (day) {
+                var exerciseIndex = day.Exercises.length;
+
+                // Add exercise to the workoutDays array for tracking
                 day.Exercises.push({
                     ExerciseId: exerciseId,
-                    ExerciseName: exerciseName,
                     Sets: sets,
                     Reps: reps,
                     Weight: weight,
                     Notes: notes
                 });
+
+                // Dynamically add exercise fields with correct naming convention for ASP.NET MVC model binding
+                var newExercise = `
+                    <tr>
+                        <td>${exerciseName}</td>
+                        <td><input type="number" name="WorkoutDays[${dayIndex}].Exercises[${exerciseIndex}].Sets" value="${sets}" class="form-control" /></td>
+                        <td><input type="number" name="WorkoutDays[${dayIndex}].Exercises[${exerciseIndex}].Reps" value="${reps}" class="form-control" /></td>
+                        <td><input type="number" name="WorkoutDays[${dayIndex}].Exercises[${exerciseIndex}].Weight" value="${weight}" class="form-control" /></td>
+                        <td><input type="hidden" name="WorkoutDays[${dayIndex}].Exercises[${exerciseIndex}].ExerciseId" value="${exerciseId}" />
+                            <input type="hidden" name="WorkoutDays[${dayIndex}].Exercises[${exerciseIndex}].Notes" value="${notes}" />
+                            ${notes ? notes : ''}
+                        </td>
+                    </tr>
+                `;
+
+                // Append the new exercise row to the table for the selected day
+                $("#day-" + dayId).append(newExercise);
             }
 
-            // Append the exercise to the table
-            var newExercise = `
-                <tr>
-                    <td>${exerciseName}</td>
-                    <td>${sets}</td>
-                    <td>${reps}</td>
-                    <td>${weight}</td>
-                    <td>${notes}</td>
-                </tr>
-            `;
-            $("#day-" + dayId).append(newExercise);
+            // Hide the Add Exercise modal after saving
             $('#addExerciseModal').modal('hide');
-
-            console.log("Exercise added to DayId: ", dayId, day.Exercises);  // Debugging log
         }
 
         function submitNewExercise() {
@@ -258,10 +254,8 @@
                 },
                 success: function (newExercise) {
                     $('#createExerciseModal').modal('hide');
-                    $('#addExerciseModal').modal('show'); // Show the 'AddExercise' modal again
-                    // Add the new exercise to the dropdown list
+                    $('#addExerciseModal').modal('show');
                     $('#exerciseId').append(new Option(newExercise.name, newExercise.exerciseId));
-                    // Automatically select the new exercise
                     $('#exerciseId').val(newExercise.exerciseId);
                 },
                 error: function () {
@@ -269,33 +263,5 @@
                 }
             });
         }
-
-        // AJAX form submission
-        $('#routineForm').on('submit', function (e) {
-            e.preventDefault();
-
-            // Collect the workout type before submission
-            routineData.WorkoutDays.forEach(day => {
-                day.WorkoutType = $(`#workoutType-${day.DayId}`).val(); // Capture the entered workout type
-            });
-
-            routineData.RoutineName = $('input[name="RoutineName"]').val(); // Routine Name
-
-            console.log("Final routineData before submit: ", routineData);  // Debugging log
-
-            $.ajax({
-                url: '@Url.Action("CreateRoutine", "Workout")',
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(routineData),
-                success: function (response) {
-                    window.location.href = "/Workout/ViewRoutine?id=" + response.workoutRoutineId; // Redirect to view the routine
-                },
-                error: function (xhr, status, error) {
-                    alert("An error occurred: " + error);
-                }
-            });
-        });
-
     </script>
 }

@@ -44,7 +44,7 @@ namespace GymQuest.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> CreateRoutine([FromBody] ViewRoutineViewModel model)
+        public async Task<IActionResult> CreateRoutine(ViewRoutineViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -81,7 +81,7 @@ namespace GymQuest.Controllers
                 };
 
                 await _workoutService.CreateRoutineAsync(newRoutine, userId);
-                return Ok(new { workoutRoutineId = newRoutine.WorkoutRoutineId }); // Return JSON response
+                return RedirectToAction("ViewRoutine" , new { id = newRoutine.WorkoutRoutineId }); // Redirect to routine view page
             }
 
             return BadRequest(ModelState);
