@@ -13,13 +13,15 @@ namespace GymQuest.Controllers
         private readonly SignInManager<User> _signInManager;
         private readonly UserService _userService;
         private readonly WorkoutService _workoutService;
+        private readonly ILogger<AccountController> _logger;
 
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, UserService userService, WorkoutService workoutService)
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, UserService userService, WorkoutService workoutService, ILogger<AccountController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _userService = userService;
             _workoutService = workoutService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -101,6 +103,7 @@ namespace GymQuest.Controllers
 
                 if (result.Succeeded)
                 {
+                    _logger.LogInformation($"{model.Email} successfully logged in");
                     // Handle successful login
                     return RedirectToAction(nameof(HomeController.Index), "Home");
                 }
