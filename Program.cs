@@ -68,7 +68,7 @@ namespace GymQuest
 
             // Configure DbContext with connection string
             builder.Services.AddDbContext<GymQuestDbContext>(options =>
-                options.UseSqlServer(connectionString)); // Using Local SQL database for now
+                options.UseSqlServer(connectionString));
 
             // Register Identity services
             builder.Services.AddIdentity<User, IdentityRole>()
