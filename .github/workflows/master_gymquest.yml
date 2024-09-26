@@ -1,0 +1,72 @@
+name: Build and deploy ASP.Net Core app to Azure Web App - GymQuest
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+
+      # Restore dependencies
+      - name: Restore dependencies
+        run: dotnet restore
+
+      # Build the app
+      - name: Build with dotnet
+        run: dotnet build --configuration Release
+
+      # Publish the app
+      - name: dotnet publish
+        run: dotnet publish --configuration Release --output ./publish_output
+
+      # Upload artifact for deployment job
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: .net-app
+          path: ./publish_output
+
+  deploy:
+    runs-on: windows-latest
+    needs: build
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    permissions:
+      id-token: write # This is required for requesting the JWT
+
+    steps:
+      # Download the published artifact
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
+          path: ./artifact_output
+
+      # Login to Azure
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_8986C24719634B26A64C4D3C7C3E7DC2 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_282B69600EDA4002933EFF558F805842 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_BD7953A70D334B5EA5CFC0B9B4E46AD3 }}
+
+      # Deploy to Azure Web App
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'GymQuest'
+          slot-name: 'Production'
+          package: ./artifact_output
