@@ -5,8 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using GymQuest.Services;
 using GymQuest.Data;
 using Azure.Identity;
-using Microsoft.Data.SqlClient;
-using System;
+using Microsoft.Extensions.Logging.AzureAppServices;
 
 namespace GymQuest
 {
@@ -28,7 +27,7 @@ namespace GymQuest
             builder.Logging.ClearProviders();
             builder.Logging.AddConsole(); // Add any other logging providers here, like Azure, Debug, etc.
             builder.Logging.AddDebug();
-            //builder.Logging.AddAzureWebAppDiagnostics(); // Optional: Log to Azure App Service diagnostics
+            builder.Logging.AddAzureWebAppDiagnostics(); // Optional: Log to Azure App Service diagnostics
 
 
             //Azure SQL Database connection string in user secrets. Will use for testing cloud DB later

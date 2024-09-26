@@ -31,9 +31,11 @@ namespace GymQuest.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
+                _logger.LogInformation("Index action accessed by logged out User");
                 return View(); // Return an empty view if no user is logged in
             }
 
+            _logger.LogInformation($"Index action accessed by User ID: {user.Id}");
             // Retrive current routine for logged-in user
             var currentRoutine = await _workoutService.GetWorkoutRoutineByIdAsync(user.CurrentWorkoutRoutineId);
 
