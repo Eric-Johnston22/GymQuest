@@ -4,6 +4,7 @@ using GymQuest.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace GymQuest.Controllers
 {
@@ -13,30 +14,36 @@ namespace GymQuest.Controllers
         private readonly SignInManager<User> _signInManager;
         private readonly UserService _userService;
         private readonly WorkoutService _workoutService;
+        private readonly ILogger<AccountController> _logger;
 
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, UserService userService, WorkoutService workoutService)
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, UserService userService, WorkoutService workoutService, ILogger<AccountController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _userService = userService;
             _workoutService = workoutService;
+            _logger = logger;
         }
 
         [HttpGet]
         public IActionResult Register()
         {
+            _logger.LogInformation("Register action accessed");
             return View();
         }
 
         [HttpGet]
         public IActionResult Login()
         {
+            _logger.LogInformation("Login action accessed");
             return View();
         }
 
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
+            _logger.LogInformation($"User creating account with email: {model.Email}");
+
             if (ModelState.IsValid)
             {
                 // Copy data from RegisterViewModel to User
@@ -56,6 +63,7 @@ namespace GymQuest.Controllers
                 // SignInManager and redirect to index action of HomeController
                 if (result.Succeeded)
                 {
+                    _logger.LogInformation($"{model.Email}'s account successfully created");
 
                     await _userService.SignInUserAsync(user, isPersistant: false);
 
@@ -70,10 +78,12 @@ namespace GymQuest.Controllers
                     return RedirectToAction("index", "home");
                 }
 
+                _logger.LogError($"Registration attempt failed. Errors below:");
                 // If there are any errors, add them to the ModelState object
                 // which will be displayed by the validation summary tag helper
                 foreach (var error in result.Errors)
                 {
+                    _logger.LogError($"{error.Code}: {error.Description}");
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
@@ -97,10 +107,13 @@ namespace GymQuest.Controllers
         {
             if (ModelState.IsValid)
             {
+                _logger.LogInformation($"User ${model.Email} attempting to log in ...");
+
                 var result = await _userService.PasswordSignInUserAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
 
                 if (result.Succeeded)
                 {
+                    _logger.LogInformation($"{model.Email} successfully logged in");
                     // Handle successful login
                     return RedirectToAction(nameof(HomeController.Index), "Home");
                 }
@@ -127,15 +140,18 @@ namespace GymQuest.Controllers
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
+            _logger.LogInformation($"Logout action accessed by User: ${User.Identity.Name}");
             await _signInManager.SignOutAsync();
             return RedirectToAction("index", "home");
         }
 
         [HttpGet]
-        public async Task<IActionResult> Profile(int id)
+        public async Task<IActionResult> Profile()
         {
             var userData = await _userService.GetUserDataAsync(User);
             var workoutRoutines = await _workoutService.GetWorkoutRoutinesByUserAsync(userData.Id);
+
+            _logger.LogInformation($"Profile action accessed by User ID: ${userData.Id}");
 
             ViewBag.FirstName = userData.FirstName;
             ViewBag.LastName = userData.LastName;
