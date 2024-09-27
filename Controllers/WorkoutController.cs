@@ -247,10 +247,10 @@ namespace GymQuest.Controllers
             await _workoutService.AddPlannedExerciseAsync(plannedExercise);
 
             // Return the exercise details
-            var exercise = await _workoutService.GetPlannedExerciseByIdAsync(exerciseId);
+            //var exercise = await _workoutService.GetPlannedExerciseByIdAsync(exerciseId); - Disable for now, issues with Azure SQL call
             return Ok(new
             {
-                exerciseId = exercise.ExerciseId,
+                exerciseId = plannedExercise.ExerciseId,
                 sets = sets,
                 reps = reps,
                 weight = weight,
