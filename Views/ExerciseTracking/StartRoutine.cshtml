@@ -218,6 +218,7 @@
                     $('#exerciseId').append(new Option(newExercise.name, newExercise.exerciseId));
                     // Automatically select the new exercise
                     $('#exerciseId').val(newExercise.exerciseId);
+                    $("#addExerciseModal").modal('show');
                 },
                 error: function () {
                     alert("An error occurred while creating the exercise. Please try again.");

@@ -100,7 +100,6 @@ namespace GymQuest.Data
         public async Task<PlannedExercises?> GetPlannedExerciseByIdAsync(int plannedExercisesId)
         {
             var ex = await _context.PlannedExercises
-                         .AsNoTracking()
                          .Include(pe => pe.Exercises)
                          .FirstOrDefaultAsync(pe => pe.PlannedExercisesId == plannedExercisesId);
 
