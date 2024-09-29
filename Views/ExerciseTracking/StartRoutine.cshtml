@@ -10,10 +10,13 @@
 @if (!Model.PlannedExercises.Any())
 {
     <p>No exercises are planned for today.</p>
-    <button type="button" class="btn btn-secondary" style="background-color: var(--bs-secondary-bg); color: var(--bs-body-color);" onclick="openAddExerciseModal('@Model.DayName')">Add Exercise</button>
+
+    <!-- Button to add the current day to the routine -->
+    <button type="button" class="btn btn-secondary" style="background-color: var(--bs-secondary-bg); color: var(--bs-body-color);" onclick="addCurrentDayToRoutine()">Add Current Day</button>
 }
 
-<table class="table table-bordered" style="color: var(--bs-body-color); border-color: var(--bs-border-color);">
+<!-- Always render the table but hide it by default -->
+<table class="table table-bordered" style="color: var(--bs-body-color); border-color: var(--bs-border-color); display: @(Model.PlannedExercises.Any() ? "table" : "none")">
     <thead style="background-color: var(--bs-primary-bg-subtle); color: var(--bs-body-color);">
         <tr>
             <th>Exercise</th>
@@ -151,18 +154,40 @@
             console.log(dayName);
             $('#workoutDayName').val(dayName);
             $('#addExerciseModal').modal('show');
-        }
+        };
 
         // Function to open the modal for creating a new exercise
         function openCreateExerciseModal() {
             $('#createExerciseModal').modal('show');
             $('#addExerciseModal').modal('hide'); // Hide the 'AddExercise' modal to avoid clutter
-        }
+        };
 
         // If the `Close` button in the 'Create New Exercise' modal is clicked, show the 'Add Exercise' Modal
         $("#newExerciseClose").click(function () {
             $('#addExerciseModal').modal('show');
-        })
+        });
+
+        // Function to add the current day to the routine
+        function addCurrentDayToRoutine() {
+            var dayName = "@Model.DayName";
+            var workoutRoutineId = "@Model.WorkoutRoutineId";
+
+            $.ajax({
+                url: '/Workout/AddCurrentDayToRoutine', // Backend method to add the current day
+                type: 'POST',
+                data: {
+                    workoutRoutineId: workoutRoutineId,
+                    dayName: dayName
+                },
+                success: function () {
+                    alert("Current day added to the routine. You can now add exercises.");
+                    location.reload(); // Reload the page to reflect the new day addition
+                },
+                error: function () {
+                    alert("An error occurred while adding the current day.");
+                }
+            });
+        };
 
        function saveSet(plannedExerciseId, setNumber, goalReps, weight, goalSets) {
             var repsCompleted = $('#actualReps\\[' + plannedExerciseId + '\\]\\[' + setNumber + '\\]').val(); // Retrieve completed reps
@@ -199,7 +224,7 @@
                     alert("An error occurred while logging the set. Please try again.");
                 }
             });
-        }
+        };
 
         function submitNewExercise() {
             var exerciseName = $('#exerciseName').val();
@@ -224,28 +249,16 @@
                     alert("An error occurred while creating the exercise. Please try again.");
                 }
             });
-        }
+        };
 
-        // Function to save the exercise via the modal
         function saveExercise() {
             var dayName = $('#dayName').val();
             var workoutRoutineId = $('#workoutRoutineId').val();
             var exerciseId = $('#exerciseId').val();
-            var exerciseName = $('#exerciseId option:selected').text();
             var sets = $('#sets').val();
             var reps = $('#reps').val();
             var weight = $('#weight').val();
             var notes = $('#notes').val();
-
-            console.log({
-                dayName: dayName,
-                workoutRoutineId: workoutRoutineId,
-                exerciseId: exerciseId,
-                sets: sets,
-                reps: reps,
-                weight: weight,
-                notes: notes
-            });
 
             $.ajax({
                 url: '/Workout/AddExerciseToDay', // Adjust the controller/action URL
@@ -260,60 +273,73 @@
                     notes: notes
                 },
                 success: function (response) {
-                    var plannedExercisesId = response.plannedExercisesId; // Use this ID for dynamic elements
+                    // Check if the response indicates that this is the first exercise added to the day
+                    if (response.refreshPage) {
+                        location.reload(); // Refresh the page to show the first exercise
+                    } else {
+                        // Handle adding additional exercises without a page refresh
 
-                    // Build the new exercise rows
-                    var newExerciseRows = "";
-                    for (var set = 1; set <= sets; set++) {
-                        if (set === 1) {
-                            newExerciseRows += `
-                            <tr class="exercise-separator">
-                                <td rowspan="${sets}" style="max-width: 100px; word-wrap: break-word; overflow-wrap: break-word;">
-                                    ${exerciseName}
-                                </td>
-                                <td>${set}</td>
-                                <td>${reps}</td>
-                                <td>${weight}</td>
-                                <td>
-                                    <input type="number" id="actualReps[${plannedExercisesId}][${set}]" min="0" max="${reps}" class="form-control" style="background-color: var(--bs-secondary-bg); color: var(--bs-body-color);" />
-                                </td>
-                                <td>
-                                    <input type="text" id="notes[${plannedExercisesId}][${set}]" class="form-control" placeholder="Add notes (optional)" style="background-color: var(--bs-secondary-bg); color: var(--bs-body-color);" />
-                                </td>
-                                <td>
-                                    <button type="button" class="btn btn-success" onclick="saveSet(${plannedExercisesId}, ${set}, ${reps}, ${weight}, ${sets})">Save Set</button>
-                                </td>
-                            </tr>`;
-                        } else {
-                            newExerciseRows += `
-                            <tr>
-                                <td>${set}</td>
-                                <td>${reps}</td>
-                                <td>${weight}</td>
-                                <td>
-                                    <input type="number" id="actualReps[${plannedExercisesId}][${set}]" min="0" max="${reps}" class="form-control" style="background-color: var(--bs-secondary-bg); color: var(--bs-body-color);" />
-                                </td>
-                                <td>
-                                    <input type="text" id="notes[${plannedExercisesId}][${set}]" class="form-control" placeholder="Add notes (optional)" style="background-color: var(--bs-secondary-bg); color: var(--bs-body-color);" />
-                                </td>
-                                <td>
-                                    <button type="button" class="btn btn-success" onclick="saveSet(${plannedExercisesId}, ${set}, ${reps}, ${weight}, ${sets})">Save Set</button>
-                                </td>
-                            </tr>`;
+                        var plannedExercisesId = response.plannedExercisesId; // Use this ID for dynamic elements
+                        var exerciseName = $('#exerciseId option:selected').text(); // Get the exercise name
+
+                        // Build the new exercise rows
+                        var newExerciseRows = "";
+                        for (var set = 1; set <= sets; set++) {
+                            if (set === 1) {
+                                newExerciseRows += `
+                                        <tr class="exercise-separator">
+                                            <td rowspan="${sets}" style="max-width: 100px; word-wrap: break-word; overflow-wrap: break-word;">
+                                                ${exerciseName}
+                                            </td>
+                                            <td>${set}</td>
+                                            <td>${reps}</td>
+                                            <td>${weight}</td>
+                                            <td>
+                                                <input type="number" id="actualReps[${plannedExercisesId}][${set}]" min="0" max="${reps}" class="form-control" style="background-color: var(--bs-secondary-bg); color: var(--bs-body-color);" />
+                                            </td>
+                                            <td>
+                                                <input type="text" id="notes[${plannedExercisesId}][${set}]" class="form-control" placeholder="Add notes (optional)" style="background-color: var(--bs-secondary-bg); color: var(--bs-body-color);" />
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-success" onclick="saveSet(${plannedExercisesId}, ${set}, ${reps}, ${weight}, ${sets})">Save Set</button>
+                                            </td>
+                                        </tr>`;
+                            } else {
+                                newExerciseRows += `
+                                        <tr>
+                                            <td>${set}</td>
+                                            <td>${reps}</td>
+                                            <td>${weight}</td>
+                                            <td>
+                                                <input type="number" id="actualReps[${plannedExercisesId}][${set}]" min="0" max="${reps}" class="form-control" style="background-color: var(--bs-secondary-bg); color: var(--bs-body-color);" />
+                                            </td>
+                                            <td>
+                                                <input type="text" id="notes[${plannedExercisesId}][${set}]" class="form-control" placeholder="Add notes (optional)" style="background-color: var(--bs-secondary-bg); color: var(--bs-body-color);" />
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-success" onclick="saveSet(${plannedExercisesId}, ${set}, ${reps}, ${weight}, ${sets})">Save Set</button>
+                                            </td>
+                                        </tr>`;
+                            }
                         }
+
+                        // Append the new rows to the table body
+                        $("tbody").append(newExerciseRows);
+
+                        // Show the table if it was hidden (since new exercises are now added)
+                        $('#exerciseTable').css('display', 'table');
+
+                        // Close the modal
+                        $('#addExerciseModal').modal('hide');
                     }
-
-                    // Append the new rows to the table body (assuming there's a single table)
-                    $("tbody").append(newExerciseRows);
-
-                    // Close the modal
-                    $('#addExerciseModal').modal('hide');
                 },
                 error: function () {
                     alert("An error occurred while adding the exercise.");
                 }
             });
         }
+
+
 
     </script>
 }

@@ -219,6 +219,7 @@ namespace GymQuest.Controllers
             return BadRequest("Invalid data provided.");
         }
 
+        // OLD METHOD -- SAVING FOR TEST PURPOSES
         [HttpPost]
         public async Task<IActionResult> AddExerciseToDay(int workoutRoutineId, string dayName, int exerciseId, int sets, int reps, decimal weight, string? notes)
         {
@@ -248,14 +249,32 @@ namespace GymQuest.Controllers
 
             // Return the exercise details
             //var exercise = await _workoutService.GetPlannedExerciseByIdAsync(exerciseId); - Disable for now, issues with Azure SQL call
+
+            // Check if this is the first exercise being added to the day
+            bool isFirstExercise = workoutDay.PlannedExercises.Count == 1;
             return Ok(new
             {
                 exerciseId = plannedExercise.ExerciseId,
                 sets = sets,
                 reps = reps,
                 weight = weight,
-                notes = notes
+                notes = notes,
+                refreshPage = isFirstExercise // Add this flag to indicate if the page should refresh
             });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddCurrentDayToRoutine(int workoutRoutineId, string dayName)
+        {
+            // Call the service layer to add the current day to the routine
+            var result = await _workoutService.AddCurrentDayToRoutineAsync(workoutRoutineId, dayName);
+
+            if (!result)
+            {
+                return BadRequest("Failed to add the current day to the routine.");
+            }
+
+            return Ok(new { success = true });
         }
 
 
@@ -362,6 +381,7 @@ namespace GymQuest.Controllers
 
             return BadRequest(); // Error
         }
+
 
 
     }
