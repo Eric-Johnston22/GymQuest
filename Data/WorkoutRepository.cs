@@ -121,6 +121,17 @@ namespace GymQuest.Data
             return await _context.SaveChangesAsync() > 0;
         }
 
+        public async Task<WorkoutDays?> GetWorkoutDayByRoutineAndDayNameAsync(int routineId, string dayName)
+        {
+            return await _context.WorkoutDays
+                .FirstOrDefaultAsync(d => d.WorkoutRoutineId == routineId && d.DaysOfWeek.DayName == dayName);
+        }
+
+        public async Task AddWorkoutDayAsync(WorkoutDays workoutDay)
+        {
+            _context.WorkoutDays.Add(workoutDay);
+            await _context.SaveChangesAsync();
+        }
 
     }
 }

@@ -147,6 +147,101 @@ namespace GymQuest.Services
             }
         }
 
+        //public async Task AddExerciseToDayAsync(int workoutRoutineId, string dayName, int exerciseId, int sets, int reps, decimal weight, string? notes)
+        //{
+        //    // Fetch the workout routine by its ID
+        //    var routine = await _workoutRepository.GetWorkoutRoutineByIdAsync(workoutRoutineId);
+
+        //    if (routine == null)
+        //    {
+        //        throw new Exception("Routine not found.");
+        //    }
+
+        //    // Map the dayName to the corresponding DayId
+        //    var dayId = GetDayIdFromDayName(dayName);
+
+        //    // Check if the day already exists in the routine
+        //    // Try to find the day by DayId
+        //    var workoutDay = routine.WorkoutDays.FirstOrDefault(d => d.DayId == dayId);
+
+        //    if (workoutDay == null)
+        //    {
+
+        //        // Create a new day for the routine
+        //        workoutDay = new WorkoutDays
+        //        {
+        //            DayId = dayId,
+        //            WorkoutRoutineId = workoutRoutineId,
+        //            WorkoutType = "General",  // Default value; adjust as needed
+        //            PlannedExercises = new List<PlannedExercises>()
+        //        };
+
+        //        // Add the new day to the routine
+        //        routine.WorkoutDays.Add(workoutDay);
+        //    }
+
+        //    // Add the exercise to the day
+        //    var plannedExercise = new PlannedExercises
+        //    {
+        //        ExerciseId = exerciseId,
+        //        Sets = sets,
+        //        Reps = reps,
+        //        Weight = weight,
+        //        Notes = notes
+        //    };
+
+        //    workoutDay.PlannedExercises.Add(plannedExercise);
+
+        //    // Update the routine with the new day and exercise
+        //    await _workoutRepository.UpdateWorkoutRoutineAsync(routine);
+        //}
+
+        public async Task<bool> AddCurrentDayToRoutineAsync(int workoutRoutineId, string dayName)
+        {
+            // Call the repository to check if the day exists or create a new one
+            var existingDay = await _workoutRepository.GetWorkoutDayByRoutineAndDayNameAsync(workoutRoutineId, dayName);
+
+            // If the day already exists, return false (or true, depending on your logic)
+            if (existingDay != null)
+            {
+                return true; // Day already exists
+            }
+
+            // Fetch the DayId for the current day (assuming DayId corresponds to the day name)
+            var dayId = GetDayIdFromDayName(dayName);
+
+            // Create a new WorkoutDay for the routine
+            var newWorkoutDay = new WorkoutDays
+            {
+                WorkoutRoutineId = workoutRoutineId,
+                DayId = dayId,
+                WorkoutType = "General", // Or set this dynamically based on user input
+                PlannedExercises = new List<PlannedExercises>() // Empty list for now
+            };
+
+            // Add the day to the routine
+            await _workoutRepository.AddWorkoutDayAsync(newWorkoutDay);
+
+            return true;
+        }
+
+        // Helper function to get DayId based on the day name
+        private int GetDayIdFromDayName(string dayName)
+        {
+            return dayName.ToLower() switch
+            {
+                "monday" => 1,
+                "tuesday" => 2,
+                "wednesday" => 3,
+                "thursday" => 4,
+                "friday" => 5,
+                "saturday" => 6,
+                "sunday" => 7,
+                _ => throw new ArgumentException("Invalid day name", nameof(dayName)),
+            };
+        }
+
+
 
         public async Task<WorkoutRoutines?> GetWorkoutRoutineByIdAsync(int? id)
         {

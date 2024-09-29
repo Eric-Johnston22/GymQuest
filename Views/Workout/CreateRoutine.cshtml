@@ -148,34 +148,36 @@
 
             // Add the day section with hidden inputs that follow ASP.NET MVC naming conventions
             var newDay = `
-                <div class="card mt-4">
-                    <div class="card-header bg-secondary text-white">
-                        <h5>${selectedDayText}</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="form-group mb-3">
-                            <label for="workoutType-${selectedDay}">Workout Type:</label>
-                            <input type="text" name="WorkoutDays[${workoutDays.length}].WorkoutType" id="workoutType-${selectedDay}" class="form-control" placeholder="Enter Workout Type" />
+                        <div class="card mt-4" id="day-card-${selectedDay}">
+                            <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                                <h5>${selectedDayText}</h5>
+                                <button type="button" class="btn btn-danger btn-sm" onclick="deleteDay(${selectedDay})">Delete Day</button>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group mb-3">
+                                    <label for="workoutType-${selectedDay}">Workout Type:</label>
+                                    <input type="text" name="WorkoutDays[${workoutDays.length}].WorkoutType" id="workoutType-${selectedDay}" class="form-control" placeholder="Enter Workout Type" />
+                                </div>
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Exercise</th>
+                                            <th>Sets</th>
+                                            <th>Reps</th>
+                                            <th>Weight</th>
+                                            <th>Notes</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="day-${selectedDay}">
+                                    </tbody>
+                                </table>
+                                <input type="hidden" name="WorkoutDays[${workoutDays.length}].DayId" value="${selectedDay}" />
+                                <input type="hidden" name="WorkoutDays[${workoutDays.length}].DayName" value="${selectedDayText}" />
+                                <button type="button" class="btn btn-secondary" onclick="openAddExerciseModal(${selectedDay}, ${workoutDays.length})">Add Exercise</button>
+                            </div>
                         </div>
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>Exercise</th>
-                                    <th>Sets</th>
-                                    <th>Reps</th>
-                                    <th>Weight</th>
-                                    <th>Notes</th>
-                                </tr>
-                            </thead>
-                            <tbody id="day-${selectedDay}">
-                            </tbody>
-                        </table>
-                        <input type="hidden" name="WorkoutDays[${workoutDays.length}].DayId" value="${selectedDay}" />
-                        <input type="hidden" name="WorkoutDays[${workoutDays.length}].DayName" value="${selectedDayText}" /> <!-- Add DayName -->
-                        <button type="button" class="btn btn-secondary" onclick="openAddExerciseModal(${selectedDay}, ${workoutDays.length})">Add Exercise</button>
-                    </div>
-                </div>
-            `;
+                    `;
 
             $("#days-container").append(newDay);
 
@@ -207,6 +209,7 @@
             $('#addExerciseModal').modal('show');
         })
 
+        // Function to save exercise
         function saveExercise(dayIndex, dayId) {
             var exerciseId = $('#exerciseId').val();
             var exerciseName = $('#exerciseId option:selected').text();
@@ -228,7 +231,7 @@
                 // Add exercise to the workoutDays array for tracking
                 day.Exercises.push({
                     ExerciseId: exerciseId,
-                    ExerciseName: exerciseName,  // Add ExerciseName here for tracking
+                    ExerciseName: exerciseName,
                     Sets: sets,
                     Reps: reps,
                     Weight: weight,
@@ -237,18 +240,22 @@
 
                 // Dynamically add exercise fields with correct naming convention for ASP.NET MVC model binding
                 var newExercise = `
-                    <tr>
-                        <td>${exerciseName}</td>
-                        <td><input type="number" name="WorkoutDays[${dayIndex}].Exercises[${exerciseIndex}].Sets" value="${sets}" class="form-control" /></td>
-                        <td><input type="number" name="WorkoutDays[${dayIndex}].Exercises[${exerciseIndex}].Reps" value="${reps}" class="form-control" /></td>
-                        <td><input type="number" name="WorkoutDays[${dayIndex}].Exercises[${exerciseIndex}].Weight" value="${weight}" class="form-control" /></td>
-                        <td style="min-width: 150px;"><input type="hidden" name="WorkoutDays[${dayIndex}].Exercises[${exerciseIndex}].ExerciseId" value="${exerciseId}" />
-                            <input type="hidden" name="WorkoutDays[${dayIndex}].Exercises[${exerciseIndex}].ExerciseName" value="${exerciseName}" /> <!-- Add ExerciseName -->
-                            <input type="hidden" name="WorkoutDays[${dayIndex}].Exercises[${exerciseIndex}].Notes" value="${notes}" />
-                            ${notes ? notes : ''}
-                        </td>
-                    </tr>
-                `;
+                            <tr id="exercise-${dayId}-${exerciseIndex}">
+                                <td>${exerciseName}</td>
+                                <td><input type="number" name="WorkoutDays[${dayIndex}].Exercises[${exerciseIndex}].Sets" value="${sets}" class="form-control" /></td>
+                                <td><input type="number" name="WorkoutDays[${dayIndex}].Exercises[${exerciseIndex}].Reps" value="${reps}" class="form-control" /></td>
+                                <td><input type="number" name="WorkoutDays[${dayIndex}].Exercises[${exerciseIndex}].Weight" value="${weight}" class="form-control" /></td>
+                                <td style="min-width: 150px;">
+                                    <input type="hidden" name="WorkoutDays[${dayIndex}].Exercises[${exerciseIndex}].ExerciseId" value="${exerciseId}" />
+                                    <input type="hidden" name="WorkoutDays[${dayIndex}].Exercises[${exerciseIndex}].ExerciseName" value="${exerciseName}" />
+                                    <input type="hidden" name="WorkoutDays[${dayIndex}].Exercises[${exerciseIndex}].Notes" value="${notes}" />
+                                    ${notes ? notes : ''}
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="deleteExercise(${dayId}, ${exerciseIndex})">Delete</button>
+                                </td>
+                            </tr>
+                        `;
 
                 // Append the new exercise row to the table for the selected day
                 $("#day-" + dayId).append(newExercise);
@@ -281,5 +288,23 @@
                 }
             });
         }
+
+        // Function to delete a day
+        function deleteDay(dayId) {
+            console.log("delete day clicked");
+            $('#day-card-' + dayId).remove();
+            workoutDays = workoutDays.filter(day => day.DayId !== dayId); // Remove the day from the array
+        }
+
+        // Function to delete an exercise
+        function deleteExercise(dayId, exerciseIndex) {
+            $('#exercise-' + dayId + '-' + exerciseIndex).remove();
+            workoutDays.forEach(day => {
+                if (day.DayId === dayId) {
+                    day.Exercises.splice(exerciseIndex, 1); // Remove the exercise from the array
+                }
+            });
+        }
+
     </script>
 }
