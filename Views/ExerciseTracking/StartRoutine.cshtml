@@ -150,6 +150,37 @@
 @section Scripts {
     <script type="text/javascript">
 
+        // When document loads, capture client timezone and local day.
+        $(document).ready(function () {
+            // Capture the user's time zone and local day
+            var timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            var userDate = new Date();
+            var localDayName = userDate.toLocaleDateString("en-US", { weekday: 'long', timeZone: timeZone });
+
+            // Log for debugging
+            console.log("Local Day Name: ", localDayName);
+
+            // Send a POST request
+            $.ajax({
+                url: '/ExerciseTracking/StartRoutine',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                data: {
+                    routineId: @Html.Raw(Model.WorkoutRoutineId),
+                    localDayName: localDayName // Send the user's local day
+                },
+                success: function (response) {
+                    // Update the page based on response, handle the view dynamically
+                    console.log("Response received: ", response);
+                    // You can update the page content here dynamically if needed
+                },
+                error: function (error) {
+                    alert("An error occurred: " + error);
+                }
+            });
+        });
+
+
         function openAddExerciseModal(dayName) {
             console.log(dayName);
             $('#workoutDayName').val(dayName);
