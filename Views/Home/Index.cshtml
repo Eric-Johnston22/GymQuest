@@ -30,9 +30,10 @@
                     {
                         <h4 class="text-secondary">Your current routine is:</h4>
                         <h2>
-                            <a asp-action="StartRoutine" asp-controller="ExerciseTracking" asp-route-RoutineId="@currentRtnId" class="link-emphasis-primary">
-                                @currentRtn
-                            </a>
+                            <h2>
+                                <a href="javascript:void(0);" onclick="startRoutine(@currentRtnId)">@currentRtn</a>
+                            </h2>
+
                         </h2>
                     }
                 </div>
@@ -59,3 +60,22 @@
         }
     </div>
 </div>
+
+@section Scripts
+{
+    <script>
+        function startRoutine(routineId) {
+            // Capture the user's time zone and local day
+            var timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            var userDate = new Date();
+            var localDayName = userDate.toLocaleDateString("en-US", { weekday: 'long', timeZone: timeZone });
+
+            // Build the URL with query parameters
+            var url = '/ExerciseTracking/StartRoutine?RoutineId=' + routineId + '&localDayName=' + encodeURIComponent(localDayName);
+
+            // Redirect to the StartRoutine method with the day name
+            window.location.href = url;
+        }
+    </script>
+
+}

@@ -22,8 +22,15 @@ namespace GymQuest.Controllers
 
         // POST: Start a workout session based on the current day
         [HttpPost, ActionName("StartRoutine")]
-        public async Task<IActionResult> StartRoutinePost(int routineId)
+        public async Task<IActionResult> StartRoutinePost(int routineId, string localDayName)
         {
+            // Check if the localDayName is null or empty
+            if (string.IsNullOrEmpty(localDayName))
+            {
+                Console.WriteLine("Local Day Name is null or empty!");
+                return BadRequest("Local Day Name is missing.");
+            }
+
             var workoutRoutine = await _workoutService.GetWorkoutRoutineByIdAsync(routineId);
             if (workoutRoutine == null)
             {
@@ -42,11 +49,14 @@ namespace GymQuest.Controllers
 
 
             var currentDayOfWeek = DateTime.Now.DayOfWeek.ToString();
+
+            // Get all exercises
             var exercises = await _workoutService.GetExercisesAsync();
             ViewBag.Exercises = exercises;
 
+            // Use the localDayName passed from the client instead of the server time
             var workoutDay = workoutRoutine.WorkoutDays
-                .FirstOrDefault(day => day.DaysOfWeek.DayName == currentDayOfWeek);
+                .FirstOrDefault(day => day.DaysOfWeek.DayName.Equals(localDayName, StringComparison.OrdinalIgnoreCase));
 
             if (workoutDay == null)
             {
@@ -55,7 +65,7 @@ namespace GymQuest.Controllers
                 {
                     WorkoutRoutineId = workoutRoutine.WorkoutRoutineId,
                     RoutineName = workoutRoutine.RoutineName,
-                    DayName = workoutDay?.DaysOfWeek?.DayName ?? currentDayOfWeek,
+                    DayName = localDayName, // Set the client's local day name
                     PlannedExercises = new List<ExerciseLogViewModel>() // No planned exercises
                 };
 
@@ -64,6 +74,7 @@ namespace GymQuest.Controllers
                 return View(startRoutineModel);
             }
 
+            // If workoutDay is found, map the exercises
             var model = new StartRoutineViewModel
             {
                 WorkoutRoutineId = workoutRoutine.WorkoutRoutineId,
@@ -86,8 +97,15 @@ namespace GymQuest.Controllers
 
         // GET: Start a workout session based on the current day
         [HttpGet, ActionName("StartRoutine")]
-        public async Task<IActionResult> StartRoutineGet(int routineId)
+        public async Task<IActionResult> StartRoutineGet(int routineId, string localDayName)
         {
+            // Check if the localDayName is null or empty
+            if (string.IsNullOrEmpty(localDayName))
+            {
+                Console.WriteLine("Local Day Name is null or empty!");
+                return BadRequest("Local Day Name is missing.");
+            }
+
             var workoutRoutine = await _workoutService.GetWorkoutRoutineByIdAsync(routineId);
             if (workoutRoutine == null)
             {
@@ -101,16 +119,12 @@ namespace GymQuest.Controllers
                 return Unauthorized(); // Handle unauthorized access
             }
 
-            // Update the user's current routine
-            await _exerciseTrackingService.SetCurrentRoutineAsync(userId, routineId);
-
-
-            var currentDayOfWeek = DateTime.Now.DayOfWeek.ToString();
             var exercises = await _workoutService.GetExercisesAsync();
             ViewBag.Exercises = exercises;
 
+            // Use the localDayName passed from the client instead of the server time
             var workoutDay = workoutRoutine.WorkoutDays
-                .FirstOrDefault(day => day.DaysOfWeek.DayName == currentDayOfWeek);
+                .FirstOrDefault(day => day.DaysOfWeek.DayName.Equals(localDayName, StringComparison.OrdinalIgnoreCase));
 
             if (workoutDay == null)
             {
@@ -119,7 +133,7 @@ namespace GymQuest.Controllers
                 {
                     WorkoutRoutineId = workoutRoutine.WorkoutRoutineId,
                     RoutineName = workoutRoutine.RoutineName,
-                    DayName = workoutDay?.DaysOfWeek?.DayName ?? currentDayOfWeek,
+                    DayName = localDayName,
                     PlannedExercises = new List<ExerciseLogViewModel>() // No planned exercises
                 };
 
