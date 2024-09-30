@@ -31,7 +31,7 @@ GymQuest is a full-featured workout tracking application built using ASP.NET Cor
 - **Security**: ASP.NET Core Identity for authentication
 
 ### Entity-Relationship Diagram (ERD)
-![GymQuest ERD](./diagrams/gymquest-erd.png)
+![GymQuest ERD](./Diagrams/gymquest-erd.png "Entity-Relationship Diagram")
 The database contains several key tables:
 - `Users`: Stores user information.
 - `WorkoutRoutines`: Stores routine metadata.
