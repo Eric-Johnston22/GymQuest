@@ -4,6 +4,13 @@
     ViewBag.Title = "User Registration";
 }
 
+<!-- Full-screen overlay with spinner -->
+<div id="loadingOverlay" class="overlay">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
 <h1>User Registration</h1>
 
 <div class="row">
@@ -12,30 +19,42 @@
             <div asp-validation-summary="All" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="FirstName">First Name</label>
-                <input asp-for="FirstName" class="form-control" />
+                <input asp-for="FirstName" class="form-control" id="firstName" />
                 <span asp-validation-for="FirstName" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="LastName">Last Name</label>
-                <input asp-for="LastName" class="form-control" />
+                <input asp-for="LastName" class="form-control" id="lastName" />
                 <span asp-validation-for="LastName" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Email"></label>
-                <input asp-for="Email" class="form-control" />
+                <label asp-for="Email">Email</label>
+                <input asp-for="Email" class="form-control" id="email" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Password"></label>
-                <input asp-for="Password" class="form-control" />
+                <label asp-for="Password">Password</label>
+                <input asp-for="Password" class="form-control" id="password" type="password" />
                 <span asp-validation-for="Password" class="text-danger"></span>
+                <div class="invalid-feedback">
+                    Password must be at least 8 characters long, contain at least one uppercase letter, one number, and one special character.
+                </div>
             </div>
             <div class="form-group">
-                <label asp-for="ConfirmPassword"></label>
-                <input asp-for="ConfirmPassword" class="form-control" />
+                <label asp-for="ConfirmPassword">Confirm Password</label>
+                <input asp-for="ConfirmPassword" class="form-control" id="confirmPassword" type="password" />
                 <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                <div class="invalid-feedback">
+                    Confirm password does not match
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary">Register</button>
+
+            <!-- Progress spinner -->
+            <div class="spinner-border text-primary d-none" id="progressSpinner" role="status">
+                <span class="visually-hidden">Saving...</span>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="registerButton">Register</button>
         </form>
     </div>
 </div>
@@ -43,8 +62,80 @@
 @section Scripts {
     <script type="text/javascript">
         $(document).ready(function () {
+
+            function validateEmail(email) {
+                var regex = /^[a-zA-Z0-9._%+-]+@@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                return regex.test(email);
+            }
+
+            function validatePassword(password) {
+                var regex = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+                return regex.test(password);
+            }
+
+            function validateConfirmPwd() {
+                var pwd = document.getElementById("password").value;
+                var confirmPwd = document.getElementById("confirmPassword").value;
+                return pwd === confirmPwd; // Return true if passwords match
+            }
+
+            // Real-time validation for all fields
+            $('#firstName, #lastName, #email, #password, #confirmPassword').on('input', function () {
+                let input = $(this);
+                let inputId = input.attr('id');
+    
+                // Validate email format using validateEmail()
+                if (inputId === 'email') {
+                    if (validateEmail(input.val())) {
+                        input.removeClass('is-invalid').addClass('is-valid');
+                    } else {
+                        input.removeClass('is-valid').addClass('is-invalid');
+                    }
+                }
+                // Validate password format using validatePassword()
+                else if (inputId === 'password') {
+                    if (validatePassword(input.val())) {
+                        input.removeClass('is-invalid').addClass('is-valid');
+                    } else {
+                        input.removeClass('is-valid').addClass('is-invalid');
+                    }
+
+                    // Also trigger confirmPassword validation when password changes
+                    if ($('#confirmPassword').val() !== '') {
+                        if (validateConfirmPwd()) {
+                            $('#confirmPassword').removeClass('is-invalid').addClass('is-valid');
+                        } else {
+                            $('#confirmPassword').removeClass('is-valid').addClass('is-invalid');
+                        }
+                    }
+                }
+                // Validate confirm password directly when the user types in the confirmPassword field
+                else if (inputId === 'confirmPassword') {
+                    if (validateConfirmPwd()) {
+                        input.removeClass('is-invalid').addClass('is-valid');
+                    } else {
+                        input.removeClass('is-valid').addClass('is-invalid');
+                    }
+                }
+                // Generic validation for other fields
+                else {
+                    if (input.val().length > 0) {
+                        input.removeClass('is-invalid').addClass('is-valid');
+                    } else {
+                        input.removeClass('is-valid').addClass('is-invalid');
+                    }
+                }
+            });
+
+
+
+            // Handle form submission
             $('#registerForm').submit(function (event) {
-                event.preventDefault(); // Prevent the default form submit
+                event.preventDefault(); // Prevent the default form submission
+
+                // Show spinner and fade effect (overlay)
+                $('#loadingOverlay').addClass('overlay-active');
+                $('#registerButton').prop('disabled', true);
 
                 // Check if form is valid before submitting via AJAX
                 if ($(this).valid()) {
@@ -55,6 +146,10 @@
                         type: 'POST',
                         data: formData,
                         success: function (response) {
+                            // Hide spinner and overlay
+                            $('#loadingOverlay').removeClass('overlay-active');
+                            $('#registerButton').prop('disabled', false);
+
                             if (response.success) {
                                 // Redirect to a new page on successful registration
                                 window.location.href = response.redirectUrl;
@@ -68,9 +163,16 @@
                             }
                         },
                         error: function (xhr, status, error) {
+                            // Hide spinner and overlay in case of error
+                            $('#loadingOverlay').removeClass('overlay-active');
+                            $('#registerButton').prop('disabled', false);
                             console.error('An error occurred: ' + error);
                         }
                     });
+                } else {
+                    // Hide spinner and overlay if the form validation fails
+                    $('#loadingOverlay').removeClass('overlay-active');
+                    $('#registerButton').prop('disabled', false);
                 }
             });
         });
