@@ -3,7 +3,8 @@
 ## Overview
 GymQuest is a full-featured workout tracking application built using ASP.NET Core MVC. It allows users to create workout routines, log exercises, and track their progress over time. Users can also dynamically add exercises to their routines and manage their daily workouts with ease. The application leverages an Azure SQL database to store workout data.
 
-**Live Application:** <a href="https://gymquest.azurewebsites.net/" target="_blank">GymQuest - Azure Deployment</a>
+- **[Live Application](https://gymquest.azurewebsites.net/)**
+- **[Application Demonstration](https://www.loom.com/share/f8b3323f6647404ca327ef6341526a36?sid=b38e928a-9dc8-425a-b149-c9782a1cb0a2)**
 
 ## Features
 - **User Registration and Authentication**: Users can sign up, log in, and manage their account.
