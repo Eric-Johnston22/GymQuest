@@ -12,16 +12,42 @@ GymQuest is a full-featured workout tracking application built using ASP.NET Cor
 - **Progress Tracking**: Log completed exercises and view past workout data.
 - **Azure SQL Integration**: Data persistence using a scalable Azure SQL Database.
 
-## User Guide
+## How to Use the Application
 
-#### Getting Started
-- **Registration**: Navigate to the <a href="https://gymquest.azurewebsites.net/account/register" target="_blank">Register page</a> to create an account.
-- **Logging In**: Use your credentials on the <a href="https://gymquest.azurewebsites.net/account/login" target="_blank">Login page</a> to access your dashboard.
+### 1. Register an Account
+- Navigate to the **[GymQuest Registration Page](https://gymquest.azurewebsites.net/account/register)**.
+- Fill in the required fields, then click the **Register** button.
+- Once registered, you will be automatically logged in and redirected to the home page.
 
-#### Managing Workout Routines
-- **Create a Workout Routine**: Once logged in, go to the "Create Routine" page, enter the routine name, add days to your routine, and add exercises to each day by selecting from the dropdown.
-- **Start a Routine**: Once you've created a routine, you will be directed to the "View Routine" page where you can either start or make further changes to your routine
-- **Log Completed Workouts**: During your workout, you can actively log your completed exercises by inputting your sets, reps, and weights. Once you've completed your workout, you will be redirected to a workout summary page.
+### 2. Logging In
+- Visit the **[Login Page](https://gymquest.azurewebsites.net/account/login)**.
+- Enter your email and password, then click **Login**.
+- Upon successful login, you will be directed to your dashboard where you can manage your workouts.
+
+### 3. Creating a Workout Routine
+- After logging in, navigate to the **"Create Routine"** section from the dashboard.
+- Enter the name of the workout routine.
+- Add exercises by selecting them from the dropdown list, specifying sets, reps, and weights for each.
+- Click **Save Routine** to store the routine.
+
+### 4. Managing Workout Routines
+- In your **Profile**, you can view your existing workout routines.
+- To edit a routine, click **View Routine** and then click **Unlock** or **Remove** next to the exercise you want to modify. You can add, update, or remove exercises as needed.
+
+### 5. Logging a Workout
+- On the **Profile page**, find the workout routine you are performing today and click **View Routine**.
+- Make any changes if desired and then click **Start Routine**.
+- The app will display the exercises planned for the current day.
+- As you complete each exercise, fill in the actual number of sets, reps, and weights, then click **Save Set**.
+- The logged data will be stored for future progress tracking.
+
+## Planned Features
+### 1. Viewing Workout History
+- View past workouts for each day, along with the number of sets, reps, and weights.
+- Display progress over time to the user
+
+### 2. Editing Your Profile
+- Update profile information (password, email, etc.)
 
 ## Architecture & Design
 ### Architecture
