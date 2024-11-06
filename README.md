@@ -18,6 +18,7 @@ GymQuest is a full-featured workout tracking application built using ASP.NET Cor
 ### 1. Register an Account
 - Navigate to the **[GymQuest Registration Page](https://gymquest.azurewebsites.net/account/register)**.
 - Fill in the required fields, then click the **Register** button.
+- **Please note** - the application goes into 'sleep mode' if it hasn't been used in the past few hours. If this is the case, the initial database interaction upon waking might take some time. Please be patient!
 - Once registered, you will be automatically logged in and redirected to the home page.
 
 ### 2. Logging In
