@@ -55,7 +55,7 @@ GymQuest is a full-featured workout tracking application built using ASP.NET Cor
 ### Architecture
 - **Frontend**: ASP.NET Core MVC + Bootstrap for responsive UI
 - **Backend**: ASP.NET Core, Entity Framework Core for data access
-- **Database**: Azure SQL
+- **Database**: T-SQL
 - **Security**: ASP.NET Core Identity for authentication
 
 ### Entity-Relationship Diagram (ERD)
