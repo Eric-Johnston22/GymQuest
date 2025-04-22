@@ -32,9 +32,9 @@ namespace GymQuest
 
             //Azure SQL Database connection string in user secrets. Will use for testing cloud DB later
             //if (builder.Environment.IsDevelopment())
-            //    {
-            //        builder.Configuration.AddUserSecrets<Program>();
-            //    }
+            //{
+            //    builder.Configuration.AddUserSecrets<Program>();
+            //}
 
             builder.Services.AddScoped<UserRepository>();
             builder.Services.AddScoped<UserService>();
@@ -56,6 +56,9 @@ namespace GymQuest
 
             // Retrive database connection string
             var connectionString = builder.Configuration["AzureSQLDatabase"];
+
+            // Retrieve local SQL database connections string
+            //var connectionString = builder.Configuration.GetConnectionString("LocalSQLDatabase");
 
             if (string.IsNullOrEmpty(connectionString))
             {
